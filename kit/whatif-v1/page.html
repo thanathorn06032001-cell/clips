@@ -1,0 +1,109 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+@font-face{font-family:Kanit;font-weight:400;src:url(fonts/kanit-thai-400-normal.woff2);unicode-range:U+0E00-0E7F}
+@font-face{font-family:Kanit;font-weight:600;src:url(fonts/kanit-thai-600-normal.woff2);unicode-range:U+0E00-0E7F}
+@font-face{font-family:Kanit;font-weight:700;src:url(fonts/kanit-thai-700-normal.woff2);unicode-range:U+0E00-0E7F}
+@font-face{font-family:Kanit;font-weight:400;src:url(fonts/kanit-latin-400-normal.woff2);unicode-range:U+0000-00FF}
+@font-face{font-family:Kanit;font-weight:600;src:url(fonts/kanit-latin-600-normal.woff2);unicode-range:U+0000-00FF}
+@font-face{font-family:Kanit;font-weight:700;src:url(fonts/kanit-latin-700-normal.woff2);unicode-range:U+0000-00FF}
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1080px;height:1920px;overflow:hidden;font-family:Kanit;background:#000}
+#st{position:relative;width:1080px;height:1920px;overflow:hidden}
+svg{position:absolute;inset:0}
+.card{position:absolute;background:#FFFDF7;border-radius:30px;overflow:hidden;box-shadow:0 16px 0 rgba(62,48,41,.18);border:5px solid #3E3029;transform-origin:center}
+.card .hd{display:flex;align-items:center;gap:12px;color:#fff;font-size:30px;font-weight:600;padding:10px 26px;white-space:nowrap}
+.card .hd span{font-size:36px}
+.big{font-size:96px;font-weight:700;color:#24304F;line-height:1.05;padding:10px 28px 18px}
+.lines{font-size:34px;font-weight:600;color:#24304F;line-height:1.5;padding:12px 28px 18px}
+.lines b{color:#E2553B}
+.sub{position:absolute;left:40px;right:40px;text-align:center;font-size:66px;font-weight:600;color:#fff;-webkit-text-stroke:12px #1F2640;paint-order:stroke fill;line-height:1.2}
+.sub b{color:#FFD447}
+.badge{position:absolute;right:34px;top:40px;background:#24304F;color:#FFD447;font-weight:700;font-size:28px;border-radius:30px;padding:6px 22px;box-shadow:0 6px 14px rgba(0,0,0,.15)}
+.choice{position:absolute;display:flex;align-items:center;gap:14px;background:#FFFDF7;border:5px solid #3E3029;border-radius:60px;padding:18px 30px;font-size:44px;font-weight:700;color:#2B1B22;box-shadow:0 12px 26px rgba(0,0,0,.25)}
+.notif{background:rgba(60,60,70,.82);border-radius:26px;padding:16px 20px;margin:12px 0;color:#fff;display:flex;gap:14px}
+.notif .av{width:56px;height:56px;border-radius:14px;flex:none;display:flex;align-items:center;justify-content:center;font-size:36px}
+.notif b{font-size:26px;display:block}.notif span{font-size:24px;opacity:.9}
+
+#cam{position:absolute;inset:0;transform-origin:540px 900px}
+#sub{position:absolute;inset:0;pointer-events:none}
+#fl{position:absolute;inset:0;background:#fff;opacity:0}
+.phone{position:absolute;width:560px;height:1100px;background:linear-gradient(#3B3355,#7B4D6A);border:22px solid #1C1B22;border-radius:76px;padding:20px 24px;box-shadow:0 0 0 4px #3E3029}
+.phone .isl{width:140px;height:36px;border-radius:18px;background:#000;margin:0 auto}
+.phone .pd{color:#fff;opacity:.85;text-align:center;font-size:32px;margin-top:40px}
+.phone .pt{color:#fff;text-align:center;font-size:130px;font-weight:600;line-height:1.1;margin-bottom:24px}
+</style></head><body>
+<div id="st"><div id="cam"></div><canvas id="sub" width="1080" height="1920"></canvas><div id="fl"></div><div class="badge">เล่าเรื่อง2มิติ</div></div>
+<div style="font-family:Kanit;font-weight:400;position:absolute;opacity:0">ก a</div><div style="font-family:Kanit;font-weight:600;position:absolute;opacity:0">ก a</div><div style="font-family:Kanit;font-weight:700;position:absolute;opacity:0">ก a</div>
+<script>const TL = /*TIMELINE*/null;</script>
+<script src="lib.js"></script>
+<script>
+const PH = TL.phrases, DUR = TL.duration;
+const P = (n) => ({ s: PH[n - 1].start, e: PH[n - 1].end });
+const sc = (n) => P(n).s - 0.1;
+const S = [], CUES = [], SHAKES = [], PUNCH = [], FLASH = [];
+const add = (start, fn) => S.push([start, fn]);
+const cue = (t, n, gain = 1) => CUES.push([+t.toFixed(3), n, gain]);
+const shake = (t, a = 12) => SHAKES.push([t, a]);
+const punch = (t, amt = 0.12) => PUNCH.push([t, amt]);
+const flash = (t) => FLASH.push(t);
+window.END_BLACK = 1e9;
+</script>
+<script src="ep.js"></script>
+<script>
+S.sort((a, b) => a[0] - b[0]); window.CUES = CUES;
+// ---------- subtitles: word-by-word pop (ElevenLabs word timing, else by text length) ----------
+const cv = document.getElementById("sub"), g = cv.getContext("2d");
+const SEG = new Intl.Segmenter("th", { granularity: "word" }), SUBC = {};
+const VIS = (s) => s.replace(/[ัิ-ฺ็-๎\s]/g, "").length;
+function subWords(k) {
+  if (SUBC[k]) return SUBC[k];
+  const out = []; let pos = 0;
+  PH[k].sub.split("<br>").forEach((l, li) => l.split(/(<b>.*?<\/b>)/).forEach((p) => {
+    if (!p) return; const b = p.startsWith("<b>");
+    for (const w of SEG.segment(p.replace(/<\/?b>/g, ""))) { out.push({ t: w.segment, b, line: li, f: pos }); pos += VIS(w.segment); }
+  }));
+  out.forEach((w) => (w.f /= Math.max(1, pos))); return (SUBC[k] = out);
+}
+function warp(ph, f) {
+  const A = ph.warp; if (!A || A.length < 2) return f * (ph.end - ph.start) * 0.9;
+  for (let i = 1; i < A.length; i++) if (f <= A[i][0]) { const [f0, t0] = A[i - 1], [f1, t1] = A[i]; return t0 + (t1 - t0) * (f1 > f0 ? (f - f0) / (f1 - f0) : 0); }
+  return A[A.length - 1][1];
+}
+window.SUB_Y = 1500;  // bottom line of subtitles (episode can move it per scene: return {subY})
+function subs(t, Y) {
+  const FS = 68;
+  for (let k = 0; k < PH.length; k++) {
+    const ph = PH[k], a = ph.start - 0.05, b = k + 1 < PH.length ? Math.min(PH[k + 1].start - 0.06, ph.end + 0.9) : ph.end + 0.6;
+    if (t < a || t >= b) continue;
+    const ws = subWords(k), nl = Math.max(...ws.map((w) => w.line)) + 1;
+    for (let li = 0; li < nl; li++) {
+      const lw = ws.filter((w) => w.line === li); let x = 0;
+      for (const w of lw) { g.font = `${w.b ? 700 : 600} ${FS}px Kanit`; w.w = g.measureText(w.t).width; w.x = x; x += w.w; }
+      const x0 = 540 - x / 2, y = Y - (nl - 1 - li) * 88;
+      for (const w of lw) {
+        if (!w.t.trim()) continue;
+        const e = t - Math.max(a, ph.start + warp(ph, w.f) - 0.12); if (e < 0) continue;
+        const p = Math.min(1, e / 0.1), s = 0.6 + 0.4 * back(p);
+        g.save(); g.globalAlpha = Math.min(1, e / 0.05); g.translate(x0 + w.x + w.w / 2, y - 22 + 26 * (1 - p)); g.scale(s, s);
+        g.font = `${w.b ? 700 : 600} ${FS}px Kanit`; g.textAlign = "center"; g.lineJoin = "round"; g.lineWidth = 15; g.strokeStyle = "#1F2640";
+        g.strokeText(w.t, 0, 22); g.fillStyle = w.b ? "#FFD447" : "#FFFFFF"; g.fillText(w.t, 0, 22); g.restore();
+      }
+    }
+  }
+}
+// ---------- frame ----------
+const cam = document.getElementById("cam"), fl = document.getElementById("fl");
+function render(t) {
+  let i = 0; while (i + 1 < S.length && t >= S[i + 1][0]) i++;
+  const o = S[i][1](t) || {};
+  let z = (o.zoom || 1) * (1 + 0.035 * clamp((t - S[i][0]) / 5)), sx = 0, sy = 0;
+  for (const [t0, a] of PUNCH) { const d = t - t0; if (d >= 0 && d < 0.5) z *= 1 + a * back(clamp(d / 0.12)) * (d < 0.12 ? 1 : Math.max(0.6, 1 - (d - 0.12) / 0.4 * 0.4)); }
+  for (const [t0, a] of SHAKES) { const d = t - t0; if (d >= 0 && d < 0.4) { const e = a * Math.exp(-d / 0.1); sx += e * Math.sin(d * 90); sy += e * Math.cos(d * 77); } }
+  cam.style.transform = `translate(${sx}px,${sy}px) scale(${z})`;
+  cam.innerHTML = `<svg viewBox="0 0 1080 1920" width="1080" height="1920">${DEFS}${o.svg || ""}${VIG}</svg>${o.html || ""}`;
+  let fa = 0; for (const t0 of FLASH) { const d = t - t0; if (d >= 0 && d < 0.25) fa = Math.max(fa, 0.8 * (1 - d / 0.25)); }
+  fl.style.opacity = t >= window.END_BLACK ? 0 : fa; fl.style.background = "#fff";
+  g.clearRect(0, 0, 1080, 1920); if (!o.noSubs) subs(t, o.subY || window.SUB_Y);
+  if (t >= window.END_BLACK) { fl.style.background = "#000"; fl.style.opacity = 1; }
+}
+window.render = render; window.READY = document.fonts.ready.then(() => Promise.all(["400", "600", "700"].map((w) => document.fonts.load(`${w} 40px Kanit`, "กขa1"))));
+</script></body></html>
