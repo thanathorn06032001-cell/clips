@@ -68,7 +68,7 @@ body.live #gear{display:none}
  <div class="ov" id="bar"><span>🥊 ยกที่ <b id="rd">1</b></span><span id="ph">⏳ ช่วงรอ</span><span>บนเวที <b id="on">0</b></span><span>รอคิว <b id="q">0</b></span></div>
 </div></div>
 <div id="hot"></div>
-<button id="gear">⚙️</button>
+<button id="gear">⚙️</button><button id="fs" style="position:fixed;right:6px;top:6px;z-index:10;height:38px;padding:0 12px;border-radius:10px;border:1px solid rgba(255,207,58,.6);background:rgba(0,0,0,.5);color:#fff;font:inherit;font-size:15px;opacity:.75">⛶ เต็มจอ</button>
 <div id="sim" class="hide">
  <div class="row"><b style="color:#ffd36b">🎛️ ผู้จัด</b><button id="bGo">🔔 เริ่มชก</button><button id="bAuto">โหมด: นับถอยหลัง</button><button id="bLob">รอ 60 วิ</button><button id="bHide">🙈 ซ่อนทั้งหมด (โหมดไลฟ์)</button></div>
  <div class="row"><button id="mode">คำพากย์: ปลอดภัย</button><button id="bMu">🎵 เพลง: เปิด</button><button id="bMv">ความดัง 60%</button><button id="bVoice">🔊 ทดสอบเสียง</button></div>
@@ -238,7 +238,11 @@ function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;S.t+=dt;step
  requestAnimationFrame(frame)}
 function fit(){const k=Math.min(innerWidth/W,innerHeight/H),st=$('stage');st.style.transform=`scale(${k})`;st.style.left=(innerWidth-W*k)/2+'px';st.style.top=(innerHeight-H*k)/2+'px'}
 addEventListener('resize',fit);fit();requestAnimationFrame(frame);
-$('bStart').onclick=()=>{$('start').remove();au();muInit();try{speechSynthesis.cancel()}catch(e){}setTimeout(voiceStatus,300);say('ยินดีต้อนรับสู่สังเวียนไลฟ์! พิมพ์ ลง เพื่อขึ้นเวทีได้เลย!',3)};
+function goFull(){const d=document.documentElement;try{const r=(d.requestFullscreen||d.webkitRequestFullscreen);if(r&&!(document.fullscreenElement||document.webkitFullscreenElement)){const pr=r.call(d,{navigationUI:'hide'});if(pr&&pr.then)pr.then(()=>{try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('portrait').catch(()=>{})}catch(e){}}).catch(()=>{})}}catch(e){}setTimeout(fit,300)}
+function fsUI(){const on=!!(document.fullscreenElement||document.webkitFullscreenElement);$('fs').style.display=on?'none':'block';setTimeout(fit,100)}
+document.addEventListener('fullscreenchange',fsUI);document.addEventListener('webkitfullscreenchange',fsUI);
+$('fs').onclick=goFull;
+$('bStart').onclick=()=>{goFull();$('start').remove();au();muInit();try{speechSynthesis.cancel()}catch(e){}setTimeout(voiceStatus,300);say('ยินดีต้อนรับสู่สังเวียนไลฟ์! พิมพ์ ลง เพื่อขึ้นเวทีได้เลย!',3)};
 $('mode').onclick=()=>{V.hard=!V.hard;$('mode').textContent='คำพากย์: '+(V.hard?'ดุดัน (สังหาร)':'ปลอดภัย')};
 /* ---------- roster (all fighters) ---------- */
 const atk=f=>Math.round(8.5*(1+f.pow)*(f.weap?WEAP[f.weap].mul:1)*(f.giant?1.6:1));

@@ -56,7 +56,7 @@ body.live #gear{display:none}#hot{position:fixed;left:0;top:0;width:70px;height:
  <div class="ov" id="bar"><span id="barM">💃 พิมพ์ <b>"เต้น"</b> ลงไปเต้น!</span><span>ขบวน <b id="cnt">0</b> · คิวรถ <b id="qn">0</b></span></div>
  <div id="start"><button id="bStart">🎉 แตะเพื่อเริ่ม</button></div>
 </div>
-<div id="hot"></div><button id="gear">⚙️</button>
+<div id="hot"></div><button id="gear">⚙️</button><button id="fs" style="position:fixed;right:6px;top:6px;z-index:10;height:38px;padding:0 12px;border-radius:10px;border:1px solid rgba(255,207,58,.6);background:rgba(0,0,0,.5);color:#fff;font:inherit;font-size:15px;opacity:.75">⛶ เต็มจอ</button>
 <div id="panel">
  <div class="row"><b style="color:#ffcf3a">🎛️ ผู้จัด</b><button id="bMu">🎵 เพลง: เปิด</button><button id="bSong">🎶 เพลงรถแห่</button><button id="bMv">ความดัง 60%</button><button id="bHide">🙈 ซ่อนทั้งหมด</button></div>
  <div class="row"><button id="bVoice">🔊 ทดสอบเสียง</button><span class="st" id="vst"></span></div>
@@ -414,7 +414,11 @@ try{$('ttUser').value=localStorage.getItem('pr_tt')||''}catch(e){}
 $('bConn').onclick=()=>{const u=$('ttUser').value.trim().replace(/^@/,'');try{localStorage.setItem('pr_tt',u)}catch(e){}if(ws&&ws.readyState===1){ws.send(JSON.stringify({type:'connect',username:u,force:true}));$('wst').textContent='กำลังเชื่อม @'+u+'…'}else{wsFail=0;wsConnect()}};
 wsConnect();
 /* ---------- controls ---------- */
-$('bStart').onclick=()=>{$('start').remove();muInit();try{speechSynthesis.cancel()}catch(e){}setTimeout(voiceStatus,300);say('รถแห่ม่วนซื่นมาแล้ว! พิมพ์ เต้น มาม่วนด้วยกันเลย!',3)};
+function goFull(){const d=document.documentElement;try{const r=(d.requestFullscreen||d.webkitRequestFullscreen);if(r&&!(document.fullscreenElement||document.webkitFullscreenElement)){const pr=r.call(d,{navigationUI:'hide'});if(pr&&pr.then)pr.then(()=>{try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('portrait').catch(()=>{})}catch(e){}}).catch(()=>{})}}catch(e){}setTimeout(fit,300)}
+function fsUI(){const on=!!(document.fullscreenElement||document.webkitFullscreenElement);$('fs').style.display=on?'none':'block';setTimeout(fit,100)}
+document.addEventListener('fullscreenchange',fsUI);document.addEventListener('webkitfullscreenchange',fsUI);
+$('fs').onclick=goFull;
+$('bStart').onclick=()=>{goFull();$('start').remove();muInit();try{speechSynthesis.cancel()}catch(e){}setTimeout(voiceStatus,300);say('รถแห่ม่วนซื่นมาแล้ว! พิมพ์ เต้น มาม่วนด้วยกันเลย!',3)};
 function muLabel(){$('bSong').textContent=MU.mode==='song'?'🎶 เพลงรถแห่':'🎛️ เพลงตื๊ด 180';$('bMu').textContent='🎵 เพลง: '+(MU.on?'เปิด':'ปิด');$('bMv').textContent='ความดัง '+Math.round(MU.vol*100)+'%'}muLabel();
 $('bSong').onclick=()=>{MU.mode=MU.mode==='song'?'synth':'song';try{localStorage.setItem('pr_mode',MU.mode)}catch(e){}muInit();muMode();muLabel()};
 $('bMu').onclick=()=>{MU.on=!MU.on;try{localStorage.setItem('pr_mu',MU.on?'1':'0')}catch(e){}muInit();muVol();muLabel()};
