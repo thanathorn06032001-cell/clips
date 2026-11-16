@@ -611,16 +611,26 @@ function firecrackers(side){const x0=side<0?40:680;for(let i=0;i<22;i++)S.firecr
 
 function touch(id){const p=S.people[id];if(p&&p.state!=='leave'){p.last=Date.now();return p}return null}
 function leave(p){if(p.state==='leave')return;p.state='leave';p.tx=p.x<360?-60:W+60;p.bubble=null}
-function person(id,nick){let p=S.people[id];if(p&&p.state!=='leave'){p.nick=nick;p.last=Date.now();return p}
+function person(id,nick,av){let p=S.people[id];if(p&&p.state!=='leave'){p.nick=nick;if(av)p.av=av;p.last=Date.now();return p}
  if(p){delete S.people[id];S.order=S.order.filter(x=>x!==id)}
  const used=new Set(Object.values(S.people).filter(q=>q.state!=='leave').map(q=>q.slot));let slot=SLOTS.findIndex((s,i)=>!used.has(i));
  if(slot<0){let old=null;for(const q of Object.values(S.people))if(q.state!=='leave'&&(!old||q.last<old.last))old=q;slot=old.slot;leave(old)}
  const sl=SLOTS[slot],fromLeft=sl.x<360;
- p=S.people[id]={id,nick,slot,last:Date.now(),x:fromLeft?-40:W+40,y:sl.y,tx:sl.x,state:'walk',girl:Math.random()<.5,shirt:pick(['#f2f2f2','#ffd36b','#ff8fb0','#8fd3ff','#c9a0ff','#ff7a59']),bow:0,bubble:null,bubbleT:0,hair:pick(['#1a0d08','#3b2014','#111'])};
+ p=S.people[id]={id,nick,av:av||'',slot,last:Date.now(),x:fromLeft?-40:W+40,y:sl.y,tx:sl.x,state:'walk',girl:Math.random()<.5,shirt:pick(['#f2f2f2','#ffd36b','#ff8fb0','#8fd3ff','#c9a0ff','#ff7a59']),bow:0,bubble:null,bubbleT:0,hair:pick(['#1a0d08','#3b2014','#111'])};
  S.order.push(id);return p}
 setInterval(()=>{const lim=IDLE.min*60000,n=Date.now();for(const q of Object.values(S.people))if(q.state!=='leave'&&n-q.last>lim)leave(q)},5000);
 function bubble(p,text){p.bubble=text;p.bubbleT=S.t+3}
 
+const AVC=new Map();
+function avImg(url){if(!url)return null;let im=AVC.get(url);if(im)return im;if(AVC.size>250){AVC.delete(AVC.keys().next().value)}
+ im=new Image();im.decoding='async';im.ok=false;im.onload=()=>{im.ok=true};im.onerror=()=>{im.bad=true};
+ const viaServer=location.protocol.startsWith('http')&&!/claude|claudeusercontent/.test(location.host);im.src=viaServer?'/av?u='+encodeURIComponent(url):url;AVC.set(url,im);return im}
+function drawAv(p,x,y,r){const sc=G.score[p.nick]||0,ring=sc>=100?'#ff4fd8':sc>=10?'#ffd36b':'#ffffff';
+ ctx.save();ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.arc(x,y+2,r+3,0,7);ctx.fill();
+ ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.closePath();ctx.save();ctx.clip();const im=avImg(p.av);
+ if(im&&im.ok){ctx.drawImage(im,x-r,y-r,r*2,r*2)}else{let h=0;for(const ch of p.nick)h=(h*31+ch.charCodeAt(0))>>>0;ctx.fillStyle=`hsl(${h%360},65%,55%)`;ctx.fillRect(x-r,y-r,r*2,r*2);ctx.fillStyle='#fff';ctx.font='600 18px Mitr, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText([...p.nick][0]||'?',x,y+1)}
+ ctx.restore();ctx.lineWidth=3;ctx.strokeStyle=ring;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.stroke();
+ if(sc>=10){ctx.font='14px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(sc>=100?'👑':'⭐',x+r-2,y-r+2)}ctx.restore()}
 function drawPerson(p){const s=.6+(p.y-1032)/160*.2;const x=p.x,y=p.y;ctx.save();ctx.translate(x,y);ctx.scale(s,s);
  const walk=p.state=='walk'||p.state=='leave';const bob=walk?Math.abs(Math.sin(S.t*10))*-4:0;const bow=p.bow>0?Math.sin(Math.min(1,p.bow)*Math.PI)*.35:0;
  ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(0,2,26,7,0,0,7);ctx.fill();
@@ -641,7 +651,7 @@ function drawPerson(p){const s=.6+(p.y-1032)/160*.2;const x=p.x,y=p.y;ctx.save()
  ctx.fillStyle='rgba(255,120,120,.4)';ctx.beginPath();ctx.arc(-12,-42,4,0,7);ctx.arc(12,-42,4,0,7);ctx.fill();
  ctx.restore();
  // label
- const showName=Date.now()-p.last<60000||(p.bubble&&S.t<p.bubbleT);if(!showName)return;const nm=p.nick.length>8?p.nick.slice(0,8)+'…':p.nick;ctx.font='500 16px Mitr, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';const lw=ctx.measureText(nm).width+14,ly=y-(walk?100:92)*s;
+ const ay=y-(walk?96:88)*s-16;drawAv(p,x,ay,18);const showName=Date.now()-p.last<60000||(p.bubble&&S.t<p.bubbleT);if(!showName)return;const nm=p.nick.length>8?p.nick.slice(0,8)+'…':p.nick;ctx.font='500 16px Mitr, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';const lw=ctx.measureText(nm).width+14,ly=ay-32;
  ctx.fillStyle='rgba(30,4,8,.75)';rr(x-lw/2,ly-11,lw,22,11);ctx.fill();ctx.fillStyle='#fff';ctx.fillText(nm,x,ly);
  if(p.bubble&&S.t<p.bubbleT){ctx.font='500 17px Mitr, sans-serif';const bw=ctx.measureText(p.bubble).width+18,by=ly-30;ctx.fillStyle='#fff8e6';rr(x-bw/2,by-14,bw,28,12);ctx.fill();ctx.fillStyle='#5a1a0e';ctx.fillText(p.bubble,x,by)}
 }
@@ -740,18 +750,18 @@ function runSeamsi(){if(SQ.busy||!SQ.q.length)return;SQ.busy=true;const nick=SQ.
 const SATU=/ส[าะ]?[ธทถ]ุ|สาทุ|สาทู|สาธู|satu|sathu|sadhu|99|๙๙|🙏/i;
 const EVN={member:'เข้า',chat:'💬',like:'❤️',follow:'ติดตาม',share:'แชร์',gift:'🎁'};const EVL=[];
 function logEv(e){if(e.type==='like'||e.type==='member')return;EVL.unshift(`${EVN[e.type]||e.type} ${cleanName(e.nick||e.user)}${e.comment?': '+String(e.comment).slice(0,30):''}${e.giftName?': '+e.giftName+' x'+(e.count||1):''}`);EVL.length=Math.min(EVL.length,8);const el=$('evlog');if(el){el.style.whiteSpace='pre-line';el.textContent=EVL.join('\n')}}
-function handle(e){logEv(e);const nick=cleanName(e.nick||e.user),id=e.user||nick;
+function handle(e){logEv(e);if(e.avatar&&S.people[e.user])S.people[e.user].av=e.avatar;const nick=cleanName(e.nick||e.user),id=e.user||nick;
  switch(e.type){
  case 'member':{touch(id);break}
  case 'chat':{const t=clean(e.comment).trim();if(!t)return;let p=touch(id);
   if(/เซียมซี|เซียม|ซีเซียม/.test(t)){seamsi(id,nick);if(p)bubble(p,'🎋 เซียมซี');return}
-  if(SATU.test(t)){const isNew=!p;p=person(id,nick);if(isNew&&Date.now()-V.lastJoin>9000){V.lastJoin=Date.now();say(`สาธุค่ะ คุณ${nick}`,0)}p.bow=.01;bubble(p,'สาธุ 🙏');textPop(p.x,p.y-130,'สาธุ 🙏','#ffd36b',26);S.glow=Math.min(1,S.glow+.08);SFX.sparkle();addScore(nick,1);return}
+  if(SATU.test(t)){const isNew=!p;p=person(id,nick,e.avatar);if(isNew&&Date.now()-V.lastJoin>9000){V.lastJoin=Date.now();say(`สาธุค่ะ คุณ${nick}`,0)}p.bow=.01;bubble(p,'สาธุ 🙏');textPop(p.x,p.y-130,'สาธุ 🙏','#ffd36b',26);S.glow=Math.min(1,S.glow+.08);SFX.sparkle();addScore(nick,1);return}
   if(/หวย|เลขเด็ด|ใบ้|งวด/.test(t)){if(p)bubble(p,'🙏');return}
   if(p)bubble(p,t.length>14?t.slice(0,14)+'…':t);addWish(nick,t);if(V.chat)say(`คุณ${nick} ขอพรว่า ${t}`,0);break}
  case 'like':{touch(id);const n=Math.min(25,e.count||1);petals(n);if(e.total&&Math.floor(e.total/500)>Math.floor((e.total-(e.count||1))/500)){textPop(560,1000,`❤️ ${e.total} หัวใจ`,'#ff9fb8',28);say('ขอบคุณสำหรับหัวใจทุกดวงนะคะ',0)}break}
  case 'follow':{const p=touch(id);addItem('garland');SFX.chime(3);toast(`💐 <b>${esc(nick)}</b> ติดตามแล้ว — ถวายพวงมาลัย`);say(`ขอบคุณคุณ${nick} ที่กดติดตามนะคะ`,1);if(p)bubble(p,'💐 ติดตามแล้ว');break}
  case 'share':{const p=touch(id);firecrackers(Math.random()<.5?-1:1);toast(`🧨 <b>${esc(nick)}</b> แชร์ไลฟ์ — จุดประทัด!`);say(`ขอบคุณคุณ${nick} ที่แชร์ไลฟ์ค่ะ`,1);if(p)bubble(p,'🧨 แชร์แล้ว');break}
- case 'gift':{const cnt=Math.max(1,e.count||1),dia=Math.max(1,e.diamonds||1),tot=dia*cnt,ti=tierOf(dia),T=TIERS[ti],p=person(id,nick),SP=specialOf(e.giftName);
+ case 'gift':{const cnt=Math.max(1,e.count||1),dia=Math.max(1,e.diamonds||1),tot=dia*cnt,ti=tierOf(dia),T=TIERS[ti],p=person(id,nick,e.avatar),SP=specialOf(e.giftName);
   p.bow=.01;bubble(p,`${SP?SP.icon:T.icon} ${e.giftName||'ของขวัญ'} x${cnt}`);addScore(nick,tot);
   const n=Math.min(30,T.sticks*cnt);for(let i=0;i<Math.min(n,ti>=3?8:10);i++)setTimeout(()=>addStick(false),i*120);
   addIncense(T.sticks*cnt);S.glow=Math.min(1.3,S.glow+.15+ti*.18);

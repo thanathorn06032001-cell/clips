@@ -19,6 +19,25 @@ app.get('/', (_req, res) => {
   res.sendFile(fs.existsSync(inPublic) ? inPublic : path.join(__dirname, 'index.html'));
 });
 app.get('/health', (_req, res) => res.json({ ok: true }));
+// ส่งต่อรูปโปรไฟล์ TikTok (กันมือถือโดนบล็อก + แคชไว้)
+const avCache = new Map();
+app.get('/av', async (req, res) => {
+  const u = String(req.query.u || '');
+  let host = '';
+  try { host = new URL(u).hostname; } catch { return res.status(400).end(); }
+  if (!/(tiktokcdn|tiktokcdn-us|ibyteimg|byteimg|muscdn)\.com$/.test(host)) return res.status(403).end();
+  const hit = avCache.get(u);
+  if (hit) return res.type(hit.type).set('Cache-Control', 'public, max-age=86400').send(hit.buf);
+  try {
+    const r = await fetch(u, { signal: AbortSignal.timeout(6000) });
+    if (!r.ok) return res.status(502).end();
+    const buf = Buffer.from(await r.arrayBuffer());
+    const type = r.headers.get('content-type') || 'image/jpeg';
+    if (avCache.size > 500) avCache.delete(avCache.keys().next().value);
+    avCache.set(u, { buf, type });
+    res.type(type).set('Cache-Control', 'public, max-age=86400').send(buf);
+  } catch { res.status(504).end(); }
+});
 // ติดตั้งเป็นแอปบนหน้าจอหลัก (เปิดแบบเต็มจอ ไม่มีแถบเว็บ)
 app.get('/manifest.json', (_req, res) => res.json({
   name: 'ศาลเจ้าแม่ประทานพร', short_name: 'ศาลเจ้าแม่', start_url: '/', scope: '/',
@@ -41,7 +60,9 @@ function broadcast(obj) {
 function status(text) { lastStatus = text; broadcast({ type: 'status', text }); console.log('[status]', text); }
 // ราคาเพชรสำรอง เผื่อข้อมูลของขวัญไม่ส่งราคามา
 const GIFT_PRICE = { rose: 1, tiktok: 1, 'finger heart': 5, 'heart me': 1, perfume: 20, doughnut: 30, 'hand hearts': 100, corgi: 299, 'money gun': 500, galaxy: 1000, lion: 29999, universe: 34999 };
-const who = d => ({ user: d?.user?.uniqueId || '', nick: d?.user?.nickname || d?.user?.uniqueId || 'ผู้ชม' });
+const picUrl = x => x?.urlList?.[0] || x?.url?.[0] || x?.urls?.[0] || '';
+const who = d => ({ user: d?.user?.uniqueId || '', nick: d?.user?.nickname || d?.user?.uniqueId || 'ผู้ชม',
+  avatar: picUrl(d?.user?.avatarThumb) || picUrl(d?.user?.avatarMedium) || picUrl(d?.user?.avatarLarge) || picUrl(d?.user?.profilePicture) || '' });
 
 async function connectTo(username) {
   clearTimeout(retryTimer);
