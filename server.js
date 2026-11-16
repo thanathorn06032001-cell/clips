@@ -19,6 +19,11 @@ app.get('/', (_req, res) => {
   res.sendFile(fs.existsSync(inPublic) ? inPublic : path.join(__dirname, 'index.html'));
 });
 app.get('/health', (_req, res) => res.json({ ok: true }));
+// เกมที่ 3: รถแห่ม่วนซื่น
+app.get('/parade', (_req, res) => {
+  const inPublic = path.join(__dirname, 'public', 'parade.html');
+  res.sendFile(fs.existsSync(inPublic) ? inPublic : path.join(__dirname, 'parade.html'));
+});
 // เกมที่ 2: มวยไลฟ์ สังเวียนเดือด
 app.get('/boxing', (_req, res) => {
   const inPublic = path.join(__dirname, 'public', 'boxing.html');
