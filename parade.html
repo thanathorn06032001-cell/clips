@@ -24,7 +24,8 @@
 #top h3{margin:0 0 3px;font-size:15px;color:#ffe36b;font-weight:500}#top .r{display:flex;justify-content:space-between;line-height:1.5}#top .r span:first-child{max-width:112px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}#top .r span:last-child{color:#ffe36b}
 #bar{left:14px;right:14px;bottom:12px;display:flex;justify-content:space-between;align-items:center;font-size:19px;padding:9px 18px;border-radius:26px;background:linear-gradient(90deg,rgba(255,61,154,.92),rgba(140,50,240,.92));border:2px solid #ffe36b;box-shadow:0 0 18px rgba(255,61,154,.7),inset 0 1px 0 rgba(255,255,255,.5);text-shadow:0 1px 3px rgba(0,0,0,.6)}
 #bar b{color:#ffe36b}
-#toasts{left:186px;right:4px;top:206px;display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+#ms{left:186px;right:10px;top:204px;display:none;background:linear-gradient(90deg,rgba(255,140,30,.92),rgba(220,40,140,.92));border:2px solid #ffe36b;border-radius:16px;padding:5px 12px;box-shadow:0 0 18px rgba(255,140,30,.7);animation:pop .4s cubic-bezier(.2,1.6,.4,1)}#msT{font-size:18px;font-weight:500;text-shadow:0 1px 2px #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mb{position:relative;height:18px;margin-top:3px;border-radius:9px;background:rgba(0,0,0,.45);overflow:hidden}#msB{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,#7dff8a,#ffe36b);transition:width .25s}#msN{position:absolute;inset:0;text-align:center;font-size:13px;line-height:18px;color:#fff;text-shadow:0 1px 2px #000}
+#toasts{left:186px;right:4px;top:276px;display:flex;flex-direction:column;align-items:flex-end;gap:5px}
 .toast{background:linear-gradient(90deg,rgba(255,61,154,.9),rgba(110,40,200,.9));border:1.5px solid rgba(255,255,255,.55);border-radius:20px;padding:3px 14px;font-size:16px;animation:tin .3s ease-out,tout .5s ease-in 3s forwards;white-space:nowrap;max-width:520px;overflow:hidden;text-overflow:ellipsis;text-shadow:0 1px 2px #000}
 .toast b{color:#ffe36b}@keyframes tin{from{transform:translateX(40px);opacity:0}}@keyframes tout{to{opacity:0}}
 #banner{left:40px;right:40px;top:540px;text-align:center;display:none}
@@ -47,10 +48,11 @@ body.live #gear{display:none}#hot{position:fixed;left:0;top:0;width:70px;height:
  <div class="ov" id="title"><h1>รถแห่ม่วนซื่น</h1></div>
  <div class="ov" id="lv"><div class="fill" id="lvf"></div><div class="tx"><span>🔥 ความม่วน LV <b id="lvn">1</b></span><span id="lvt">0/300</span></div></div>
  <div class="ov" id="strip"><div class="rail" id="rail"></div></div>
- <div class="ov" id="top"><h3>👑 ขาแดนซ์ Top 5</h3><div id="tl"></div></div>
+ <div class="ov" id="top"><h3>👑 สายม่วน Top 5</h3><div id="tl"></div></div>
+ <div class="ov" id="ms"><div id="msT"></div><div class="mb"><div id="msB"></div><span id="msN"></span></div></div>
  <div class="ov" id="toasts"></div>
  <div class="ov" id="banner"><div><h2 id="bnT"></h2><p id="bnP"></p></div></div>
- <div class="ov" id="bar"><span>💃 พิมพ์ <b>"เต้น"</b> มาเต้นด้วยกัน!</span><span>ในขบวน <b id="cnt">0</b></span></div>
+ <div class="ov" id="bar"><span id="barM">💃 พิมพ์ <b>"เต้น"</b> ลงไปเต้น!</span><span>ขบวน <b id="cnt">0</b> · คิวรถ <b id="qn">0</b></span></div>
  <div id="start"><button id="bStart">🎉 แตะเพื่อเริ่ม</button></div>
 </div>
 <div id="hot"></div><button id="gear">⚙️</button>
@@ -59,7 +61,7 @@ body.live #gear{display:none}#hot{position:fixed;left:0;top:0;width:70px;height:
  <div class="row"><button id="bVoice">🔊 ทดสอบเสียง</button><span class="st" id="vst"></span></div>
  <div class="row"><input id="ttUser" placeholder="ชื่อ TikTok"><button id="bConn">เชื่อมต่อ</button></div>
  <div class="st" id="wst">โหมดทดสอบ</div>
- <div class="row">ทดสอบ: <button data-s="join">+6 คนเต้น</button><button data-s="like">❤️</button><button data-s="rose">🌹</button><button data-s="tiktok">🎵</button><button data-s="donut">🍩</button><button data-s="hands">🫶</button><button data-s="money">💸</button><button data-s="galaxy">🎤</button><button data-s="whale">🐋</button><button data-s="universe">🌌</button></div>
+ <div class="row">ทดสอบ: <button data-s="join">+6 คนเต้น</button><button data-s="mun">💬ม่วน/โย่ x6</button><button data-s="ms">🎯ภารกิจ</button><button data-s="rose10">🌹x10</button><button data-s="like">❤️</button><button data-s="rose">🌹</button><button data-s="tiktok">🎵</button><button data-s="donut">🍩</button><button data-s="hands">🫶</button><button data-s="money">💸</button><button data-s="galaxy">🎤</button><button data-s="whale">🐋</button><button data-s="universe">🌌</button></div>
 </div>
 <script>
 'use strict';
@@ -69,7 +71,7 @@ function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const clean=n=>String(n||'').replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu,'').trim()||'เพื่อน';
 /* ---------- state ---------- */
-const BPM=180;const S={t:0,beat:0,crowd:[],onStage:[],parts:[],fw:[],lan:[],lvl:1,fun:0,need:300,score:{},led:'รถแห่ม่วนซื่น • พิมพ์ "เต้น" มาม่วนกัน!',ledT:0,party:0,lead:null,whale:null,scroll:0};
+const BPM=180;const S={t:0,beat:0,crowd:[],onStage:[],parts:[],fw:[],lan:[],lvl:1,fun:0,need:300,score:{},led:'รถแห่ม่วนซื่น • พิมพ์ "เต้น" มาม่วนกัน!',ledT:0,party:0,lead:null,whale:null,scroll:0,q:[],pts:{},likes:0,ms:null,msNext:40,joined:0};
 /* ---------- gifts ---------- */
 const GIFTS=[
  {k:'rose',re:/^rose$|rosa|กุหลาบ|โรซ่า/i,icon:'🌹',n:'ขึ้นเวที 15 วิ',d:'1'},
@@ -81,7 +83,8 @@ const GIFTS=[
  {k:'whale',re:/whale|วาฬ/i,icon:'🐋',n:'วาฬทองบินผ่าน',d:'2150'},
  {k:'universe',re:/universe|จักรวาล/i,icon:'🌌',n:'คอนเสิร์ตใหญ่!',d:'44999'},
 ];
-$('rail').innerHTML=[...GIFTS,...GIFTS].map(g=>`<div class="card"><i>${g.icon}</i><b>${g.n}</b><small>💎${g.d}</small></div>`).join('');
+const RULES=[['💬','พิมพ์ "เต้น" ลงไปเต้น','ฟรี'],['🎁','ของขวัญชิ้นไหนก็ได้ ขึ้นรถ 20 วิ','1 เหรียญก็ได้'],['🌹','ส่งเพิ่ม +20 วิ ต่อชิ้น','สะสมได้'],['🎤','ครบ 10 ชิ้น เป็นนักร้องนำ','สะสม'],['❤️','ไลค์ครบ 300 ปาร์ตี้','ฟรี'],['🎯','ทำภารกิจ ยิงพลุทั้งขบวน','ฟรี'],['🎵','TikTok ทุกคนเต้นฉลอง','1'],['🍩','โดนัท ยิงพลุ','30']];
+$('rail').innerHTML=[...RULES,...RULES].map(g=>`<div class="card"><i>${g[0]}</i><b>${g[1]}</b><small>${g[2]}</small></div>`).join('');
 /* ---------- background (night temple fair) ---------- */
 function srand(a){return()=>{a=(a*1664525+1013904223)>>>0;return a/4294967296}}
 const sky=document.createElement('canvas');sky.width=W;sky.height=860;
@@ -167,7 +170,7 @@ function avatar(p,x,y,r,ring='#fff'){ctx.fillStyle='rgba(0,0,0,.4)';ctx.beginPat
  if(p.img&&p.img.complete&&p.img.naturalWidth)ctx.drawImage(p.img,x-r,y-r,2*r,2*r);else{ctx.fillStyle='#fff';ctx.font=`600 ${r*1.05}px Mitr, sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText([...p.nick][0]||'?',x,y+1)}ctx.restore();ctx.lineWidth=3;ctx.strokeStyle=ring;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.stroke()}
 function label(t,x,y,sz=13,bgc='rgba(26,6,48,.82)',fg='#fff'){ctx.font=`500 ${sz}px Mitr, sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';const w=ctx.measureText(t).width+14;ctx.fillStyle=bgc;rr(x-w/2,y-sz*.78,w,sz*1.56,sz*.78);ctx.fill();ctx.fillStyle=fg;ctx.fillText(t,x,y+.5)}
 /* ---------- 3D dancer sprite (Mixamo samba, pre-rendered) ---------- */
-const SHEETS=[['m_yellow',174],['m_pink',174],['m_blue',174],['man_white',140],['man_pink',140],['man_blue',140]].map(([k,w])=>{const o={k,w,h:170,n:218,cols:16,fps:12,ok:false,img:new Image()};o.img.onload=()=>{o.ok=true};o.img.src='assets/d_'+k+'.webp';return o});
+const SHEETS=[['m_yellow',174],['m_pink',174],['m_blue',174],['m_green',174],['m_purple',174],['m_red',174]].map(([k,w])=>{const o={k,w,h:170,n:218,cols:16,fps:12,ok:false,img:new Image()};o.img.onload=()=>{o.ok=true};o.img.src='assets/d_'+k+'.webp';return o});
 const D3={get ok(){return SHEETS.some(x=>x.ok)}};
 function dance3D(p,x,y,s,opt={}){if(p.off===undefined){p.off=Math.floor(rnd(0,218));p.flip=Math.random()<.5;p.spd=rnd(.95,1.15);p.var=Math.floor(rnd(0,SHEETS.length))}
  let sh=SHEETS[p.var];if(!sh.ok){sh=SHEETS.find(x=>x.ok)}
@@ -220,7 +223,7 @@ function drawTruck(){const party=S.party>S.t,pul=kick(),sh=Math.sin(S.t*20)*.6;c
  ctx.fillStyle='#1c1c2a';ctx.fillRect(104,deck,640,26);for(let i=0;i<32;i++){const on=(i+Math.floor(S.beat*4))%4<2;ctx.fillStyle=`hsl(${(i*22+S.t*160)%360},95%,${on?64:38}%)`;rr(108+i*19.6,deck+8,14,10,3);ctx.fill()}
  S.stageSlots.forEach((sl,i)=>{const d=sl.p;if(!d){if(i<4){if(D3.ok)dance3D(DANCERS[i],sl.x,deck+6,.82,{party});else drawPerson(DANCERS[i],sl.x,deck+4,1.1,{party})}return}
   ctx.save();ctx.globalCompositeOperation='lighter';const sg=ctx.createRadialGradient(sl.x,deck-50,6,sl.x,deck-50,80);sg.addColorStop(0,'rgba(255,225,130,.22)');sg.addColorStop(1,'rgba(255,225,130,0)');ctx.fillStyle=sg;ctx.beginPath();ctx.arc(sl.x,deck-50,80,0,7);ctx.fill();ctx.restore();
-  let hy=deck-134;if(D3.ok){hy=dance3D(d,sl.x,deck+6,.86,{party})-18}else drawPerson(d,sl.x,deck+4,1.15,{party,crown:sl.vip,mic:sl.vip});avatar(d,sl.x,hy,17,sl.vip?'#ff3d9a':'#ffd23a');label((sl.vip?'👑 ':'')+clean(d.nick).slice(0,9),sl.x,hy-28,13,'rgba(255,210,58,.95)','#3a1040')});
+  let hy=deck-134;if(D3.ok){hy=dance3D(d,sl.x,deck+6,.86,{party})-18}else drawPerson(d,sl.x,deck+4,1.15,{party,crown:sl.vip,mic:sl.vip});avatar(d,sl.x,hy,17,sl.vip?'#ff3d9a':'#ffd23a');label((sl.vip?'🎤 ':'')+clean(d.nick).slice(0,9)+' '+Math.ceil(sl.until-S.t)+'s',sl.x,hy-28,13,sl.vip?'rgba(255,61,154,.95)':'rgba(255,210,58,.95)',sl.vip?'#fff':'#3a1040')});
  // cold pyro
  if(party){ctx.save();ctx.globalCompositeOperation='lighter';[204,696].forEach(px=>{for(let i=0;i<5;i++)S.parts.push({t:'s',x:px+rnd(-4,4),y:deck,vx:rnd(-40,40),vy:rnd(-520,-300),g:520,life:rnd(.5,.9),max:.9,sz:rnd(1.5,3),c:pick(['#fff','#ffe9a0','#ffd23a'])})});ctx.restore()}
  // skirt
@@ -263,27 +266,59 @@ function lanterns(n){for(let i=0;i<n;i++)S.lan.push({x:rnd(20,700),y:rnd(700,900
 function toast(h){const d=document.createElement('div');d.className='toast';d.innerHTML=h;$('toasts').append(d);while($('toasts').children.length>3)$('toasts').firstChild.remove();setTimeout(()=>d.remove(),3600)}
 let bT;function banner(t,p,ms=3500){$('bnT').textContent=t;$('bnP').textContent=p;const b=$('banner');b.style.display='block';b.firstElementChild.style.animation='none';void b.offsetWidth;b.firstElementChild.style.animation='';clearTimeout(bT);bT=setTimeout(()=>b.style.display='none',ms)}
 function addFun(n){S.fun+=n;while(S.fun>=S.need){S.fun-=S.need;S.lvl++;S.need=Math.round(S.need*1.25/10)*10;for(let i=0;i<10;i++)setTimeout(firework,i*220);confetti(80);banner(`🔥 ความม่วน LV ${S.lvl}!`,'ม่วนซื่นโฮแซว! ขอบคุณทุกคนนะ');say(`ความม่วนเลเวล ${S.lvl}! ม่วนซื่นโฮแซว!`,3)}}
-function onStage(p,sec,vip){let sl=S.stageSlots.find(s=>s.p&&s.p.id===p.id);if(!sl)sl=vip?S.stageSlots[4]:(S.stageSlots.slice(0,4).find(s=>!s.p)||S.stageSlots.slice(0,4).reduce((a,b)=>a.until<b.until?a:b));sl.p=p;sl.until=Math.max(sl.until,S.t)+sec;burst(sl.x,560,30,['#ffcf3a','#fff','#ff3d9a'])}
+function onStageOld(p,sec,vip){let sl=S.stageSlots.find(s=>s.p&&s.p.id===p.id);if(!sl)sl=vip?S.stageSlots[4]:(S.stageSlots.slice(0,4).find(s=>!s.p)||S.stageSlots.slice(0,4).reduce((a,b)=>a.until<b.until?a:b));sl.p=p;sl.until=Math.max(sl.until,S.t)+sec;burst(sl.x,560,30,['#ffcf3a','#fff','#ff3d9a'])}
+const onTruck=p=>S.stageSlots.some(s=>s.p&&s.p.id===p.id);
+function truckAdd(p,sec){let sl=S.stageSlots.find(s=>s.p&&s.p.id===p.id);if(sl){sl.until+=sec;return 'ext'}
+ const free=S.stageSlots.slice(0,4).find(s=>!s.p);if(free){free.p=p;free.until=S.t+sec;burst(free.x,560,30,['#ffcf3a','#fff','#ff3d9a']);return 'up'}
+ const q=S.q.find(o=>o.p.id===p.id);if(q){q.sec+=sec;return 'q'}S.q.push({p,sec});return 'q'}
+function makeLead(p,sec){let left=0;S.stageSlots.slice(0,4).forEach(s=>{if(s.p&&s.p.id===p.id){left=Math.max(0,s.until-S.t);s.p=null}});S.q=S.q.filter(o=>o.p.id!==p.id);
+ const v=S.stageSlots[4];if(v.p&&v.p.id!==p.id&&v.until>S.t){truckAdd(v.p,Math.ceil(v.until-S.t))}
+ if(v.p&&v.p.id===p.id)v.until+=sec;else{v.p=p;v.until=S.t+sec+left}S.lead=p;S.leadUntil=v.until;S.led=`🎤 นักร้องนำ: ${clean(p.nick)} 🎤`;burst(430,560,50,['#ffcf3a','#fff','#ff3d9a'])}
+function truckTick(){for(const sl of S.stageSlots)if(sl.p&&S.t>sl.until){sl.p=null}
+ for(const sl of S.stageSlots.slice(0,4))if(!sl.p&&S.q.length){const o=S.q.shift();sl.p=o.p;sl.until=S.t+o.sec;burst(sl.x,560,30,['#ffcf3a','#fff','#ff3d9a']);toast(`🚚 <b>${esc(o.p.nick)}</b> ขึ้นรถแล้ว!`)}
+ if(S.lead&&!S.stageSlots[4].p){S.lead=null;S.led='รถแห่ม่วนซื่น • พิมพ์ "เต้น" มาม่วนกัน!'}}
+const pts=(n,v)=>{S.pts[n]=(S.pts[n]||0)+v};
+/* ---------- missions ---------- */
+const MS=[
+ ()=>{const n=Math.min(30,8+Math.floor(S.crowd.length/2));return{k:'word',re:/ม่วน/,need:n,dur:25,txt:`พิมพ์ "ม่วน" ให้ครบ ${n} ครั้ง`}},
+ ()=>{const n=Math.min(12,3+Math.floor(S.crowd.length/4));return{k:'uniq',re:/โย่|โย|yo/i,need:n,dur:30,txt:`${n} คน พิมพ์ "โย่" พร้อมกัน`,who:new Set()}},
+ ()=>({k:'like',need:200,dur:20,txt:'กดหัวใจรัวๆ ให้ครบ 200'}),
+ ()=>({k:'join',need:3,dur:40,txt:'ชวนเพื่อนพิมพ์ "เต้น" เพิ่ม 3 คน'}),
+];
+function msStart(){const m=pick(MS)();m.have=0;m.until=S.t+m.dur;m.dur0=m.dur;S.ms=m;$('ms').style.display='block';$('msT').textContent='🎯 ภารกิจ: '+m.txt;say('ภารกิจมาแล้ว! '+m.txt.replace(/"/g,''),3)}
+function msAdd(k,v,uid){const m=S.ms;if(!m||m.k!==k)return;if(k==='uniq'){if(m.who.has(uid))return;m.who.add(uid);m.have=m.who.size}else m.have+=v;if(m.have>=m.need)msEnd(true)}
+function msEnd(ok){const m=S.ms;S.ms=null;S.msNext=S.t+rnd(55,80);$('ms').style.display='none';
+ if(ok){S.party=Math.max(S.party,S.t)+12;for(let i=0;i<12;i++)setTimeout(firework,i*200);confetti(100);S.crowd.forEach(c=>{pts(c.nick,5);c.hopT=S.t+Math.random()*.3});addFun(120);banner('🎯 ภารกิจสำเร็จ!','ทุกคนในขบวนได้ +5 แต้ม');say('ภารกิจสำเร็จ! เก่งมากทุกคน ม่วนซื่นโฮแซว!',3)}
+ else{toast('😅 เกือบแล้ว! รอบหน้าเอาใหม่');say('เกือบแล้ว! รอบหน้าเอาใหม่นะ',1)}}
+function msTick(){if(S.ms){const m=S.ms;$('msB').style.width=Math.min(100,m.have/m.need*100)+'%';$('msN').textContent=`${Math.min(m.have,m.need)}/${m.need} • ${Math.max(0,Math.ceil(m.until-S.t))} วิ`;if(S.t>m.until)msEnd(false)}
+ else if(S.t>S.msNext&&S.crowd.length>=1)msStart()}
 /* ---------- events ---------- */
 const CD={};const cool=(k,s)=>{const n=Date.now();if(CD[k]&&n-CD[k]<s*1000)return false;CD[k]=n;return true};
 function handle(e){const id=e.user||e.nick,nick=String(e.nick||'เพื่อน').slice(0,16);
  if(e.type==='chat'){const t=String(e.comment||'');const isNew=!S.crowd.find(c=>c.id===id);
-  if(/เต้น|แดนซ์|dance|ม่วน|ซิ่ง|โยก|มันส์/i.test(t)){const p=join(id,nick,e.avatar);addFun(isNew?10:3);if(isNew){toast(`💃 <b>${esc(nick)}</b> มาเต้นแล้ว!`);if(cool('joinv',8))say(`${clean(nick)} มาแล้ว! ม่วนเลย!`,0)}return}
-  const p=S.crowd.find(c=>c.id===id);if(p){p.last=Date.now();p.bub=t.slice(0,14);p.bubT=S.t+3}addFun(1)}
- if(e.type==='like'){const p=S.crowd.find(c=>c.id===id);if(p)p.last=Date.now();addFun(Math.min(20,e.count||1))}
+  if(S.ms){if(S.ms.k==='word'&&S.ms.re.test(t))msAdd('word',1);if(S.ms.k==='uniq'&&S.ms.re.test(t))msAdd('uniq',1,id)}
+  if(/เต้น|แดนซ์|dance|ซิ่ง|โยก|มันส์/i.test(t)||(isNew&&/ม่วน/.test(t))){const p=join(id,nick,e.avatar);p.hopT=S.t;addFun(isNew?10:3);if(isNew){pts(nick,3);S.joined++;msAdd('join',1);toast(`💃 <b>${esc(nick)}</b> มาเต้นแล้ว!`);if(cool('joinv',8))say(`${clean(nick)} มาแล้ว! ม่วนเลย!`,0)}else if(cool('p'+id,2))pts(nick,1);return}
+  const p=S.crowd.find(c=>c.id===id);if(p){p.last=Date.now();p.bub=t.slice(0,14);p.bubT=S.t+3;p.hopT=S.t;if(cool('p'+id,2))pts(nick,1)}addFun(1)}
+ if(e.type==='like'){const c=e.count||1,p=S.crowd.find(c=>c.id===id);if(p){p.last=Date.now();p.hopT=S.t;if(cool('l'+id,3))pts(nick,1)}addFun(Math.min(20,c));msAdd('like',c);
+  const b=Math.floor(S.likes/300);S.likes+=c;if(Math.floor(S.likes/300)>b){S.party=Math.max(S.party,S.t)+8;confetti(60);toast(`❤️ ไลค์ครบ ${Math.floor(S.likes/300)*300}! ปาร์ตี้!`);if(cool('likev',20))say('หัวใจครบสามร้อย! ปาร์ตี้เลย!',1)}}
  if(e.type==='follow'){toast(`💖 <b>${esc(nick)}</b> กดติดตาม!`);say(`ขอบคุณ ${clean(nick)} ที่กดติดตามนะ!`,1);addFun(20)}
  if(e.type==='share'){toast(`📣 <b>${esc(nick)}</b> แชร์ไลฟ์!`);firework();addFun(20)}
- if(e.type==='gift'){const p=join(id,nick,e.avatar),cnt=Math.max(1,e.count||1),d=(e.diamonds||1)*cnt;S.score[nick]=(S.score[nick]||0)+d;addFun(Math.min(400,d*2+10));
-  let g=GIFTS.find(x=>x.re.test(e.giftName||''));if(!g){const dd=e.diamonds||1;g=dd>=1000?GIFTS[5]:dd>=500?GIFTS[4]:dd>=100?GIFTS[3]:dd>=30?GIFTS[2]:dd>=5?GIFTS[1]:GIFTS[0]}
-  const N=clean(nick);toast(`${g.icon} <b>${esc(nick)}</b> — ${g.n}${cnt>1?' x'+cnt:''}`);
-  if(g.k==='rose'){onStage(p,15*Math.min(cnt,10));say(`ขอบคุณ ${N} ส่งกุหลาบ ขึ้นมาเต้นบนรถแห่เลย!`,2)}
-  if(g.k==='tiktok'){S.party=Math.max(S.party,S.t)+8;say(`${N} ชวนทุกคนเต้นฉลอง! โยกเลย!`,2)}
-  if(g.k==='donut'){for(let i=0;i<6;i++)setTimeout(firework,i*250);onStage(p,20);say(`${N} ยิงพลุ! สวยงามมาก!`,2)}
-  if(g.k==='hands'){lanterns(40);onStage(p,30);say(`${N} ปล่อยโคมลอยเต็มฟ้า ขอให้โชคดีนะ!`,2)}
-  if(g.k==='money'){money(120);onStage(p,40);S.party=S.t+10;say(`ฝนแบงก์ร้อยจาก ${N}! รวยๆ เฮงๆ!`,3)}
-  if(g.k==='galaxy'){S.lead=p;S.leadUntil=S.t+30;onStage(p,30,1);S.led=`🎤 นักร้องนำ: ${N} 🎤`;banner('🎤 นักร้องนำคนใหม่!',N+' ขึ้นเวทีกลาง 30 วินาที');say(`ขอเสียงปรบมือให้นักร้องนำ ${N}!`,3)}
-  if(g.k==='whale'){S.whale={x:-300,y:380,by:N};money(60);S.party=S.t+10;banner('🐋 วาฬทองบินผ่าน!','จาก '+N);say(`ว้าว! วาฬทองของ ${N} บินผ่านรถแห่!`,3)}
-  if(g.k==='universe'){S.lead=p;S.leadUntil=S.t+60;onStage(p,60,1);S.party=S.t+20;for(let i=0;i<20;i++)setTimeout(firework,i*180);confetti(160);lanterns(50);S.whale={x:-300,y:360,by:N};S.led=`🌌 คอนเสิร์ตใหญ่โดย ${N} 🌌`;banner('🌌 คอนเสิร์ตใหญ่!',N+' เปิดคอนเสิร์ตทั้งหมู่บ้าน!',5000);say(`คอนเสิร์ตใหญ่! ขอบคุณ ${N} มากๆ ม่วนซื่นทั้งหมู่บ้าน!`,3)}}}
+ if(e.type==='gift'){const p=join(id,nick,e.avatar),cnt=Math.max(1,e.count||1),d=(e.diamonds||1)*cnt;S.score[nick]=(S.score[nick]||0)+d;addFun(Math.min(300,cnt*15+d));pts(nick,5*cnt);p.hopT=S.t;
+  let g=GIFTS.find(x=>x.re.test(e.giftName||''));const N=clean(nick);
+  const sec=Math.min(600,20*cnt+Math.floor(d/10)*5);const prev=p.gifts||0;p.gifts=prev+cnt;
+  const willLead=Math.floor(p.gifts/10)>Math.floor(prev/10);const r=willLead?'lead':truckAdd(p,sec);
+  if(r!=='lead')toast(`🎁 <b>${esc(nick)}</b> ${r==='up'?'ขึ้นรถแห่!':r==='ext'?'+'+sec+' วิ บนรถ':'เข้าคิวขึ้นรถ #'+(S.q.findIndex(o=>o.p.id===p.id)+1)} (${p.gifts%10}/10 🎤)`);
+  if(willLead){makeLead(p,60+sec);toast(`🎤 <b>${esc(nick)}</b> เป็นนักร้องนำ!`);banner('🎤 นักร้องนำคนใหม่!',N+' ส่งครบ 10 ชิ้น ขึ้นเวทีกลาง!');say(`ขอเสียงปรบมือให้นักร้องนำ ${N}! ส่งครบสิบชิ้นแล้ว!`,3)}
+  else if(r==='up'&&cool('gv',4))say(`ขอบคุณ ${N}! ขึ้นมาเต้นบนรถแห่เลย!`,2);else if(cool('gv',6))say(`ขอบคุณ ${N} นะ!`,1);
+  const k=g?g.k:'';
+  if(k==='tiktok'){S.party=Math.max(S.party,S.t)+8}
+  if(k==='donut'){for(let i=0;i<6;i++)setTimeout(firework,i*250)}
+  if(k==='hands'){lanterns(40)}
+  if(k==='money'){money(120);S.party=S.t+10}
+  if(k==='galaxy'){makeLead(p,60)}
+  if(k==='whale'){S.whale={x:-300,y:380,by:N};money(60);S.party=S.t+10}
+  if(k==='universe'){makeLead(p,90);S.party=S.t+20;for(let i=0;i<20;i++)setTimeout(firework,i*180);confetti(160);lanterns(50);S.whale={x:-300,y:360,by:N}}
+  if(!k&&d>=30)for(let i=0;i<Math.min(8,d/30);i++)setTimeout(firework,i*250)}}
 /* ---------- loop ---------- */
 const BOKEH=[...Array(9)].map((_,i)=>({x:rnd(0,W),y:rnd(820,1260),r:rnd(30,70),v:rnd(6,16),c:['255,61,154','255,210,58','53,214,255'][i%3]}));
 let last=performance.now();
@@ -298,10 +333,10 @@ function frame(now){if(now-last<30){requestAnimationFrame(frame);return}const dt
  const pul=kick();ctx.save();ctx.globalCompositeOperation='lighter';[[170,'255,61,154'],[440,'255,210,58'],[660,'53,214,255']].forEach(([x,c])=>{ctx.save();ctx.translate(x,800);ctx.scale(1,.36);const r=ctx.createRadialGradient(0,0,6,0,0,250);r.addColorStop(0,`rgba(${c},${.34+pul*.14})`);r.addColorStop(1,`rgba(${c},0)`);ctx.fillStyle=r;ctx.beginPath();ctx.arc(0,0,250,0,7);ctx.fill();ctx.restore()});
  const cr=ctx.createRadialGradient(360,1010,20,360,1010,440);cr.addColorStop(0,'rgba(170,80,255,.22)');cr.addColorStop(1,'rgba(170,80,255,0)');ctx.fillStyle=cr;ctx.fillRect(0,792,W,H-792);ctx.restore();
  ctx.fillStyle='rgba(255,230,160,.4)';for(let x=-((S.scroll*1.2)%130);x<W;x+=130){rr(x,812,64,5,2.5);ctx.fill()}
- for(const sl of S.stageSlots)if(sl.p&&S.t>sl.until)sl.p=null;if(S.lead&&S.t>S.leadUntil){S.lead=null;S.led='รถแห่ม่วนซื่น • พิมพ์ "เต้น" มาม่วนกัน!'}
+ truckTick();msTick();
  drawTruck();drawBeams();
  // crowd
- const party=S.party>S.t;S.crowd.slice().sort((a,b)=>a.slot-b.slot).forEach(p=>{const [tx,ty]=crowdPos(p.slot);p.x+=clamp(tx-p.x,-220*dt,220*dt);let ay;if(D3.ok){const s3=.86+(ty-930)/76*.04;ay=dance3D(p,p.x,ty,s3,{party})-16}else{const s=.82+(ty-892)/72*.03;drawPerson(p,p.x,ty,s,{party});ay=ty-(106+(party?12:0))*s}
+ const party=S.party>S.t;S.crowd.slice().sort((a,b)=>a.slot-b.slot).forEach(p=>{if(onTruck(p))return;const [tx,ty0]=crowdPos(p.slot),hp=p.hopT!=null&&S.t-p.hopT<.45&&S.t>=p.hopT?Math.sin((S.t-p.hopT)/.45*Math.PI)*34:0,ty=ty0-hp;p.x+=clamp(tx-p.x,-220*dt,220*dt);let ay;if(D3.ok){const s3=.86+(ty0-930)/76*.04;ay=dance3D(p,p.x,ty,s3,{party})-16}else{const s=.82+(ty-892)/72*.03;drawPerson(p,p.x,ty,s,{party});ay=ty-(106+(party?12:0))*s}
   const sc=S.score[p.nick]||0;avatar(p,p.x,ay,13,sc>=100?'#ff3d9a':sc>=1?'#ffd23a':'#fff');
   if(p.bub&&S.t<p.bubT)label(p.bub,p.x,ay-23,12,'rgba(255,255,255,.95)','#3a1040');else if(Date.now()-p.last<60000)label(clean(p.nick).slice(0,8),p.x,ay-21,11)});
  // whale
@@ -320,9 +355,10 @@ function frame(now){if(now-last<30){requestAnimationFrame(frame);return}const dt
   else if(p.t==='m'){p.r+=dt*3;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(Math.sin(p.r)*.6);ctx.fillStyle='#e8203a';rr(-18,-9,36,18,3);ctx.fill();ctx.fillStyle='#ffd8d8';rr(-14,-6,28,12,2);ctx.fill();ctx.fillStyle='#a0101a';ctx.font='600 10px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('100',0,.5);ctx.restore()}}
  ctx.save();ctx.globalCompositeOperation='lighter';for(const b of BOKEH){b.x+=b.v*dt;if(b.x>W+80)b.x=-80;const r=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r);r.addColorStop(0,`rgba(${b.c},.10)`);r.addColorStop(.8,`rgba(${b.c},.07)`);r.addColorStop(1,`rgba(${b.c},0)`);ctx.fillStyle=r;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,7);ctx.fill()}ctx.restore();
  ctx.drawImage(vig,0,0);
- $('cnt').textContent=S.crowd.length;$('lvn').textContent=S.lvl;$('lvt').textContent=`${S.fun}/${S.need}`;$('lvf').style.width=(S.fun/S.need*100)+'%';
+ $('cnt').textContent=S.crowd.length;$('qn').textContent=S.q.length;$('lvn').textContent=S.lvl;$('lvt').textContent=`${S.fun}/${S.need}`;$('lvf').style.width=(S.fun/S.need*100)+'%';
  requestAnimationFrame(frame)}
-setInterval(()=>{const top=Object.entries(S.score).sort((a,b)=>b[1]-a[1]).slice(0,5);$('tl').innerHTML=top.length?top.map(([n,v],i)=>`<div class="r"><span>${['🥇','🥈','🥉','4.','5.'][i]} ${esc(n)}</span><span>${v}</span></div>`).join(''):'<div class="r"><span>ส่งของขวัญขึ้นเวทีเลย!</span></div>'},500);
+setInterval(()=>{const top=Object.entries(S.pts).sort((a,b)=>b[1]-a[1]).slice(0,5);$('tl').innerHTML=top.length?top.map(([n,v],i)=>`<div class="r"><span>${['🥇','🥈','🥉','4.','5.'][i]} ${esc(n)}</span><span>${v}</span></div>`).join(''):'<div class="r"><span>พิมพ์ เต้น เก็บแต้ม!</span></div>'},500);
+let bi=0;setInterval(()=>{const M=['💃 พิมพ์ <b>"เต้น"</b> ลงไปเต้น!','🎁 ของขวัญ <b>ชิ้นไหนก็ได้</b> ขึ้นรถ!','🎤 ครบ <b>10 ชิ้น</b> = นักร้องนำ!','❤️ ไลค์ครบ <b>300</b> = ปาร์ตี้!'];bi=(bi+1)%M.length;$('barM').innerHTML=M[bi]},4000);
 function fit(){const k=Math.min(innerWidth/W,innerHeight/H),st=$('stage');st.style.transform=`scale(${k})`;st.style.left=(innerWidth-W*k)/2+'px';st.style.top=(innerHeight-H*k)/2+'px'}
 addEventListener('resize',fit);fit();requestAnimationFrame(frame);
 /* ---------- audio: แดนซ์ตื๊ด 180 BPM ---------- */
@@ -383,7 +419,9 @@ $('bHide').onclick=()=>{$('panel').classList.remove('show');document.body.classL
 let taps=[];$('hot').addEventListener('pointerdown',()=>{const n=Date.now();taps=taps.filter(t=>n-t<900);taps.push(n);if(taps.length>=3){taps=[];document.body.classList.remove('live');$('panel').classList.add('show')}});
 const NM=['น้องฝน','Beam','ป้าแดง','ลุงดู่','Aom','Plo','เจ๊หมวย','Nok','มะปราง','ต้นกล้า','แม่ค้า','Zin','ก้อย','บอย','ใบเตย','โอ๊ต','แจ็ค','มิว','เบล','ต้า','นัท','กิ๊ฟ','ปาล์ม','ฟ้า'];let ni=0;
 document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{const k=b.dataset.s;if(k==='join'){for(let i=0;i<6;i++){const n=NM[ni%NM.length]+(ni>=NM.length?ni:'');ni++;handle({type:'chat',user:'u'+ni,nick:n,comment:'เต้น'})}return}
- const c=S.crowd.length?pick(S.crowd):{id:'u0',nick:'น้องฝน'};if(k==='like')return handle({type:'like',user:c.id,nick:c.nick,count:20});
+ if(k==='ms'){if(S.ms)msEnd(false);msStart();return}
+ if(k==='mun'){S.crowd.slice(0,6).forEach(c=>handle({type:'chat',user:c.id,nick:c.nick,comment:pick(['ม่วนๆ','โย่','ม่วนซื่น','โย่ว'])}));return}
+ const c=S.crowd.length?pick(S.crowd):{id:'u0',nick:'น้องฝน'};if(k==='rose10')return handle({type:'gift',user:c.id,nick:c.nick,giftName:'Rose',diamonds:1,count:10});if(k==='like')return handle({type:'like',user:c.id,nick:c.nick,count:20});
  const G={rose:['Rose',1],tiktok:['TikTok',1],donut:['Doughnut',30],hands:['Hand Hearts',100],money:['Money Gun',500],galaxy:['Galaxy',1000],whale:['Whale diving',2150],universe:['TikTok Universe',44999]}[k];handle({type:'gift',user:c.id,nick:c.nick,giftName:G[0],diamonds:G[1],count:1})});
 </script>
 </body>
