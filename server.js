@@ -128,7 +128,11 @@ wss.on('connection', ws => {
   ws.send(JSON.stringify({ type: 'status', text: lastStatus }));
   ws.on('message', raw => {
     let m; try { m = JSON.parse(raw); } catch { return; }
-    if (m.type === 'connect') connectTo(m.username);
+    if (m.type === 'connect') {
+      const u = String(m.username || '').replace(/^@/, '').trim();
+      if (!m.force && conn && u && u === wantUser) { ws.send(JSON.stringify({ type: 'status', text: lastStatus })); return; }
+      connectTo(u);
+    }
     if (m.type === 'disconnect') {
       wantUser = ''; clearTimeout(retryTimer);
       if (conn) { try { conn.disconnect(); } catch {} conn = null; }
