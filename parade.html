@@ -167,11 +167,13 @@ function avatar(p,x,y,r,ring='#fff'){ctx.fillStyle='rgba(0,0,0,.4)';ctx.beginPat
  if(p.img&&p.img.complete&&p.img.naturalWidth)ctx.drawImage(p.img,x-r,y-r,2*r,2*r);else{ctx.fillStyle='#fff';ctx.font=`600 ${r*1.05}px Mitr, sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText([...p.nick][0]||'?',x,y+1)}ctx.restore();ctx.lineWidth=3;ctx.strokeStyle=ring;ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.stroke()}
 function label(t,x,y,sz=13,bgc='rgba(26,6,48,.82)',fg='#fff'){ctx.font=`500 ${sz}px Mitr, sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';const w=ctx.measureText(t).width+14;ctx.fillStyle=bgc;rr(x-w/2,y-sz*.78,w,sz*1.56,sz*.78);ctx.fill();ctx.fillStyle=fg;ctx.fillText(t,x,y+.5)}
 /* ---------- 3D dancer sprite (Mixamo samba, pre-rendered) ---------- */
-const D3={img:new Image(),n:218,cols:16,w:234,h:240,fps:12,ok:false};D3.img.onload=()=>{D3.ok=true};D3.img.src='assets/dancer.webp';
-function dance3D(p,x,y,s,opt={}){if(p.off===undefined){p.off=Math.floor(rnd(0,D3.n));p.flip=Math.random()<.5;p.spd=rnd(.95,1.15)}
- const sp=(opt.party?1.7:1.3)*p.spd,i=Math.floor(S.t*D3.fps*sp+p.off)%D3.n,sx=(i%D3.cols)*D3.w,sy=Math.floor(i/D3.cols)*D3.h,w=D3.w*s,h=D3.h*s,hop=opt.party?Math.abs(Math.sin(S.beat*Math.PI))*10:0;
- ctx.fillStyle='rgba(0,0,0,.45)';ctx.beginPath();ctx.ellipse(x,y,30*s*2.2,7*s*2,0,0,7);ctx.fill();
- ctx.save();ctx.translate(x,y-hop);if(p.flip)ctx.scale(-1,1);ctx.drawImage(D3.img,sx,sy,D3.w,D3.h,-w/2,-h,w,h);ctx.restore();return y-hop-h*.86}
+const SHEETS=[['m_yellow',174],['m_pink',174],['m_blue',174],['man_white',140],['man_pink',140],['man_blue',140]].map(([k,w])=>{const o={k,w,h:170,n:218,cols:16,fps:12,ok:false,img:new Image()};o.img.onload=()=>{o.ok=true};o.img.src='assets/d_'+k+'.webp';return o});
+const D3={get ok(){return SHEETS.some(x=>x.ok)}};
+function dance3D(p,x,y,s,opt={}){if(p.off===undefined){p.off=Math.floor(rnd(0,218));p.flip=Math.random()<.5;p.spd=rnd(.95,1.15);p.var=Math.floor(rnd(0,SHEETS.length))}
+ let sh=SHEETS[p.var];if(!sh.ok){sh=SHEETS.find(x=>x.ok)}
+ const sp=(opt.party?1.7:1.3)*p.spd,i=Math.floor(S.t*sh.fps*sp+p.off)%sh.n,sx=(i%sh.cols)*sh.w,sy=Math.floor(i/sh.cols)*sh.h,w=sh.w*s,h=sh.h*s,hop=opt.party?Math.abs(Math.sin(S.beat*Math.PI))*10:0;
+ ctx.fillStyle='rgba(0,0,0,.45)';ctx.beginPath();ctx.ellipse(x,y,46*s,11*s,0,0,7);ctx.fill();
+ ctx.save();ctx.translate(x,y-hop);if(p.flip)ctx.scale(-1,1);ctx.drawImage(sh.img,sx,sy,sh.w,sh.h,-w/2,-h,w,h);ctx.restore();return y-hop-h*.9}
 /* ---------- band on truck ---------- */
 const BAND=[{role:'แคน',x:262},{role:'พิณ',x:352},{role:'กลอง',x:450},{role:'คีย์บอร์ด',x:556}].map(b=>Object.assign(b,mkPerson('band_'+b.role,b.role)));BAND.forEach((b,i)=>{b.out=[['#ff3d6a','#ffe36b'],['#35a0ff','#ffe36b'],['#2a2a3a','#ff3d9a'],['#a44dff','#fff']][i];b.girl=false;b.hs=[0,3,2,1][i];b.acc=i===2?'glasses':'';b.move='swing';b.ph=0});
 const DANCERS=[0,1,2,3].map(i=>Object.assign(mkPerson('d'+i,'หางเครื่อง'),{girl:true,hs:[0,2,1,3][i],acc:'',out:[['#ff3d9a','#ffe36b'],['#ffd23a','#ff3d9a'],['#35d6ff','#fff'],['#ff7ad0','#ffe36b']][i],move:['soeng','wave','wave','soeng'][i],ph:i%2?.5:0}));
@@ -216,9 +218,9 @@ function drawTruck(){const party=S.party>S.t,pul=kick(),sh=Math.sin(S.t*20)*.6;c
  ctx.save();ctx.globalCompositeOperation='lighter';for(let i=0;i<5;i++){const hx=180+((S.t*18+i*140)%620),hg=ctx.createRadialGradient(hx,deck-6,4,hx,deck-6,110);hg.addColorStop(0,'rgba(255,170,230,.16)');hg.addColorStop(1,'rgba(255,170,230,0)');ctx.fillStyle=hg;ctx.beginPath();ctx.ellipse(hx,deck-6,110,34,0,0,7);ctx.fill()}ctx.restore();
  // deck
  ctx.fillStyle='#1c1c2a';ctx.fillRect(104,deck,640,26);for(let i=0;i<32;i++){const on=(i+Math.floor(S.beat*4))%4<2;ctx.fillStyle=`hsl(${(i*22+S.t*160)%360},95%,${on?64:38}%)`;rr(108+i*19.6,deck+8,14,10,3);ctx.fill()}
- S.stageSlots.forEach((sl,i)=>{const d=sl.p;if(!d){if(i<4){if(D3.ok)dance3D(DANCERS[i],sl.x,deck+6,.58,{party});else drawPerson(DANCERS[i],sl.x,deck+4,1.1,{party})}return}
+ S.stageSlots.forEach((sl,i)=>{const d=sl.p;if(!d){if(i<4){if(D3.ok)dance3D(DANCERS[i],sl.x,deck+6,.82,{party});else drawPerson(DANCERS[i],sl.x,deck+4,1.1,{party})}return}
   ctx.save();ctx.globalCompositeOperation='lighter';const sg=ctx.createRadialGradient(sl.x,deck-50,6,sl.x,deck-50,80);sg.addColorStop(0,'rgba(255,225,130,.22)');sg.addColorStop(1,'rgba(255,225,130,0)');ctx.fillStyle=sg;ctx.beginPath();ctx.arc(sl.x,deck-50,80,0,7);ctx.fill();ctx.restore();
-  let hy=deck-134;if(D3.ok){hy=dance3D(d,sl.x,deck+6,.6,{party})-18}else drawPerson(d,sl.x,deck+4,1.15,{party,crown:sl.vip,mic:sl.vip});avatar(d,sl.x,hy,17,sl.vip?'#ff3d9a':'#ffd23a');label((sl.vip?'👑 ':'')+clean(d.nick).slice(0,9),sl.x,hy-28,13,'rgba(255,210,58,.95)','#3a1040')});
+  let hy=deck-134;if(D3.ok){hy=dance3D(d,sl.x,deck+6,.86,{party})-18}else drawPerson(d,sl.x,deck+4,1.15,{party,crown:sl.vip,mic:sl.vip});avatar(d,sl.x,hy,17,sl.vip?'#ff3d9a':'#ffd23a');label((sl.vip?'👑 ':'')+clean(d.nick).slice(0,9),sl.x,hy-28,13,'rgba(255,210,58,.95)','#3a1040')});
  // cold pyro
  if(party){ctx.save();ctx.globalCompositeOperation='lighter';[204,696].forEach(px=>{for(let i=0;i<5;i++)S.parts.push({t:'s',x:px+rnd(-4,4),y:deck,vx:rnd(-40,40),vy:rnd(-520,-300),g:520,life:rnd(.5,.9),max:.9,sz:rnd(1.5,3),c:pick(['#fff','#ffe9a0','#ffd23a'])})});ctx.restore()}
  // skirt
@@ -299,7 +301,7 @@ function frame(now){if(now-last<30){requestAnimationFrame(frame);return}const dt
  for(const sl of S.stageSlots)if(sl.p&&S.t>sl.until)sl.p=null;if(S.lead&&S.t>S.leadUntil){S.lead=null;S.led='รถแห่ม่วนซื่น • พิมพ์ "เต้น" มาม่วนกัน!'}
  drawTruck();drawBeams();
  // crowd
- const party=S.party>S.t;S.crowd.slice().sort((a,b)=>a.slot-b.slot).forEach(p=>{const [tx,ty]=crowdPos(p.slot);p.x+=clamp(tx-p.x,-220*dt,220*dt);let ay;if(D3.ok){const s3=.62+(ty-892)/72*.03;ay=dance3D(p,p.x,ty,s3,{party})-16}else{const s=.82+(ty-892)/72*.03;drawPerson(p,p.x,ty,s,{party});ay=ty-(106+(party?12:0))*s}
+ const party=S.party>S.t;S.crowd.slice().sort((a,b)=>a.slot-b.slot).forEach(p=>{const [tx,ty]=crowdPos(p.slot);p.x+=clamp(tx-p.x,-220*dt,220*dt);let ay;if(D3.ok){const s3=.86+(ty-930)/76*.04;ay=dance3D(p,p.x,ty,s3,{party})-16}else{const s=.82+(ty-892)/72*.03;drawPerson(p,p.x,ty,s,{party});ay=ty-(106+(party?12:0))*s}
   const sc=S.score[p.nick]||0;avatar(p,p.x,ay,13,sc>=100?'#ff3d9a':sc>=1?'#ffd23a':'#fff');
   if(p.bub&&S.t<p.bubT)label(p.bub,p.x,ay-23,12,'rgba(255,255,255,.95)','#3a1040');else if(Date.now()-p.last<60000)label(clean(p.nick).slice(0,8),p.x,ay-21,11)});
  // whale
