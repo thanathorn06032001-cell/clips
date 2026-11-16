@@ -256,7 +256,7 @@ function roof(g,cx,y,w,h){const gr=g.createLinearGradient(0,y,0,y+h);gr.addColor
  g.lineWidth=2;g.strokeStyle='rgba(60,0,0,.35)';for(let i=1;i<10;i++){const k=i/10;g.beginPath();g.moveTo(cx-w*.27+w*.54*k,y);g.lineTo(cx-w/2+w*k,y+h);g.stroke()}
  g.fillStyle='#ffcf5a';[-1,1].forEach(s=>{g.beginPath();g.arc(cx+s*(w/2+34),y+h-38,9,0,7);g.fill()})}
 const FAIRY=[];
-function buildBg(){const g=bg.getContext('2d');
+function buildBg(){const g=bg.getContext('2d');FAIRY.length=0;g.setTransform(1,0,0,1,0,0);g.globalAlpha=1;g.globalCompositeOperation='source-over';g.clearRect(0,0,W,H);
  let gr=g.createLinearGradient(0,0,0,800);gr.addColorStop(0,'#090a1e');gr.addColorStop(.55,'#24133e');gr.addColorStop(1,'#4a2236');g.fillStyle=gr;g.fillRect(0,0,W,800);
  // far treeline
  g.fillStyle='#120c1c';for(let x=-20;x<W+40;x+=46){g.beginPath();g.arc(x,700+Math.sin(x)*14,60,0,7);g.fill()}g.fillRect(0,700,W,100);
@@ -464,7 +464,7 @@ function drawFirecr(){for(let i=S.firecr.length-1;i>=0;i--){const f=S.firecr[i];
  else{ctx.fillStyle='#d4141e';ctx.fillRect(f.x-4,f.y-8,8,16)}}}
 
 let last=performance.now();
-function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;S.t+=dt;
+function frame(now){if(now-last<30){requestAnimationFrame(frame);return}const dt=Math.min(.05,(now-last)/1000);last=now;S.t+=dt;ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
  S.glow=Math.max(0,S.glow-dt*.25);S.rays=Math.max(0,S.rays-dt*.12);
  for(const id of S.order){const p=S.people[id];if(!p)continue;if(p.state=='walk'){const d=p.tx-p.x;p.x+=Math.sign(d)*Math.min(Math.abs(d),150*dt);if(Math.abs(d)<2){p.state='kneel';p.bow=.01}}if(p.bow>0){p.bow+=dt*1.2;if(p.bow>1)p.bow=0}}
  S.sticks=S.sticks.filter(s=>S.t-s.born<s.life);
@@ -574,6 +574,12 @@ $('ttsOn').onchange=e=>{V.on=e.target.checked;store.set('tOn',V.on)};$('ttsChat'
 $('bTestVoice').onclick=()=>{audioInit();say('สวัสดีค่ะ ยินดีต้อนรับสู่ศาลเจ้าแม่ประทานพร พิมพ์สาธุเพื่อรับพรได้เลยค่ะ',3)};
 $('bStart').onclick=()=>{$('start').remove();audioInit();if(A.ctx&&A.ctx.state=='suspended')A.ctx.resume();say('สวัสดีค่ะ ยินดีต้อนรับสู่ศาลเจ้าแม่ประทานพร พิมพ์สาธุเพื่อรับพร หรือพิมพ์เซียมซีเพื่อเสี่ยงเซียมซีได้เลยค่ะ',3)};
 hudTop();hudGoal();fit();wsConnect();requestAnimationFrame(frame);
+function bgLost(){try{const g=bg.getContext('2d');if(g.isContextLost&&g.isContextLost())return true;return g.getImageData(4,4,1,1).data[3]===0}catch(e){return true}}
+function healBg(){if(bgLost()){buildBg();S.parts=S.parts.filter(p=>p.type!=='smoke')}}
+setInterval(healBg,1500);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){last=performance.now();setTimeout(healBg,100);setTimeout(()=>{if(A.ctx&&A.ctx.state!=='running')A.ctx.resume()},200)}});
+bg.addEventListener&&bg.addEventListener('contextrestored',()=>buildBg());
+cv.addEventListener('contextrestored',()=>{last=performance.now()});
 for(let i=0;i<6;i++)addStick(false);addItem('fruit');addItem('soda');addItem('marigold');
 </script>
 </body>
