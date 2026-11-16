@@ -19,6 +19,11 @@ app.get('/', (_req, res) => {
   res.sendFile(fs.existsSync(inPublic) ? inPublic : path.join(__dirname, 'index.html'));
 });
 app.get('/health', (_req, res) => res.json({ ok: true }));
+// เกมที่ 2: มวยไลฟ์ สังเวียนเดือด
+app.get('/boxing', (_req, res) => {
+  const inPublic = path.join(__dirname, 'public', 'boxing.html');
+  res.sendFile(fs.existsSync(inPublic) ? inPublic : path.join(__dirname, 'boxing.html'));
+});
 // ส่งต่อรูปโปรไฟล์ TikTok (กันมือถือโดนบล็อก + แคชไว้)
 const avCache = new Map();
 app.get('/av', async (req, res) => {
