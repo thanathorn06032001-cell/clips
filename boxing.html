@@ -69,7 +69,7 @@ body.live #gear{display:none}
 <button id="gear">⚙️</button>
 <div id="sim" class="hide">
  <div class="row"><b style="color:#ffd36b">🎛️ ผู้จัด</b><button id="bGo">🔔 เริ่มชก</button><button id="bAuto">โหมด: นับถอยหลัง</button><button id="bLob">รอ 60 วิ</button><button id="bHide">🙈 ซ่อนทั้งหมด (โหมดไลฟ์)</button></div>
- <div class="row"><button id="mode">คำพากย์: ปลอดภัย</button><button id="bVoice">🔊 ทดสอบเสียง</button></div>
+ <div class="row"><button id="mode">คำพากย์: ปลอดภัย</button><button id="bMu">🎵 เพลง: เปิด</button><button id="bMv">ความดัง 60%</button><button id="bVoice">🔊 ทดสอบเสียง</button></div>
  <div class="st" id="vst">🔊 กำลังเช็กเสียง…</div>
  <div class="row"><input id="ttUser" placeholder="ชื่อ TikTok"><button id="bConn">เชื่อมต่อ</button></div>
  <div class="st" id="wst">โหมดทดสอบ</div>
@@ -234,7 +234,7 @@ function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;S.t+=dt;step
  requestAnimationFrame(frame)}
 function fit(){const k=Math.min(innerWidth/W,innerHeight/H),st=$('stage');st.style.transform=`scale(${k})`;st.style.left=(innerWidth-W*k)/2+'px';st.style.top=(innerHeight-H*k)/2+'px'}
 addEventListener('resize',fit);fit();requestAnimationFrame(frame);
-$('bStart').onclick=()=>{$('start').remove();au();try{speechSynthesis.cancel()}catch(e){}setTimeout(voiceStatus,300);say('ยินดีต้อนรับสู่สังเวียนไลฟ์! พิมพ์ ลง เพื่อขึ้นเวทีได้เลย!',3)};
+$('bStart').onclick=()=>{$('start').remove();au();muInit();try{speechSynthesis.cancel()}catch(e){}setTimeout(voiceStatus,300);say('ยินดีต้อนรับสู่สังเวียนไลฟ์! พิมพ์ ลง เพื่อขึ้นเวทีได้เลย!',3)};
 $('mode').onclick=()=>{V.hard=!V.hard;$('mode').textContent='คำพากย์: '+(V.hard?'ดุดัน (สังหาร)':'ปลอดภัย')};
 /* ---------- roster (all fighters) ---------- */
 const atk=f=>Math.round(8.5*(1+f.pow)*(f.weap?WEAP[f.weap].mul:1)*(f.giant?1.6:1));
@@ -257,13 +257,47 @@ function pickVoice(){if(!('speechSynthesis' in window))return;const vs=speechSyn
 if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
 const clean=n=>String(n).replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu,'').trim()||'นักมวย';
 function say(t,prio=1){if(!V.on||!('speechSynthesis' in window))return;V.q.push({t,prio});if(V.q.length>3){V.q.sort((a,b)=>b.prio-a.prio);V.q.length=3}next()}
-function next(){if(V.busy||!V.q.length)return;const it=V.q.shift();V.busy=true;const u=new SpeechSynthesisUtterance(it.t);u.lang='th-TH';if(V.voice)u.voice=V.voice;u.rate=1.18;u.pitch=1.05;
+function next(){if(V.busy||!V.q.length){if(!V.busy)muDuck(false);return}const it=V.q.shift();V.busy=true;muDuck(true);const u=new SpeechSynthesisUtterance(it.t);u.lang='th-TH';if(V.voice)u.voice=V.voice;u.rate=1.18;u.pitch=1.05;
  const done=()=>{if(!V.busy)return;V.busy=false;clearTimeout(V.t);setTimeout(next,120)};u.onend=done;u.onerror=done;V.t=setTimeout(()=>{try{speechSynthesis.cancel()}catch(e){}done()},2500+it.t.length*150);speechSynthesis.speak(u)}
 const KO_SAFE=['{a} น็อก {b}!','{a} จัดการ {b} เรียบร้อย!','{b} ร่วงแล้ว ฝีมือ {a}!','{a} ส่ง {b} กลับบ้าน!','{a} ปิดฉาก {b}!','หมัดเด็ด! {a} ล้ม {b}!'];
 const KO_HARD=['{a} สังหาร {b}!','{a} สังหาร {b} อย่างโหด!','{b} ถูก {a} สังหารแล้ว!'];
 function koVoice(a,b){a.streak=(a.streak||0)+1;const A=clean(a.nick),B=clean(b.nick);
  if(a.streak>=3&&a.streak%3===0){say(`${A} ไร้เทียมทาน! ล้มไปแล้ว ${a.streak} คนติด!`,2);return}
  const L=V.hard?KO_HARD.concat(KO_SAFE.slice(0,2)):KO_SAFE;say(pick(L).replace('{a}',A).replace('{b}',B),1)}
+/* ---------- Muay Thai music (pi java + klong khaek + ching) ---------- */
+const MU={on:true,vol:.6,node:null,step:0,bar:0,next:0,timer:null,pi:null,last:-1};
+try{MU.on=localStorage.getItem('box_mu')!=='0';const v=parseFloat(localStorage.getItem('box_mv'));if(v>=0)MU.vol=v}catch(e){}
+function muInit(){const c=au();if(!c||MU.node)return;MU.node=c.createGain();MU.duck=c.createGain();const comp=c.createDynamicsCompressor();MU.node.connect(MU.duck);MU.duck.connect(comp);comp.connect(c.destination);MU.node.gain.value=MU.on?MU.vol*.55:0;
+ const nb=c.createBuffer(1,c.sampleRate,c.sampleRate),d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;MU.noise=nb;
+ // pi java: continuous reed voice with vibrato
+ const o1=c.createOscillator(),o2=c.createOscillator(),lfo=c.createOscillator(),lg=c.createGain(),bp=c.createBiquadFilter(),lp=c.createBiquadFilter(),g=c.createGain();
+ o1.type='sawtooth';o2.type='square';o2.detune.value=7;lfo.frequency.value=5.8;lg.gain.value=9;lfo.connect(lg);lg.connect(o1.detune);lg.connect(o2.detune);
+ bp.type='peaking';bp.frequency.value=1400;bp.Q.value=1.6;bp.gain.value=9;lp.type='lowpass';lp.frequency.value=3200;const m2=c.createGain();m2.gain.value=.35;
+ o1.connect(bp);o2.connect(m2);m2.connect(bp);bp.connect(lp);lp.connect(g);g.connect(MU.node);g.gain.value=0;[o1,o2,lfo].forEach(o=>o.start());MU.pi={o1,o2,g};
+ MU.next=c.currentTime+.1;MU.timer=setInterval(muSched,25)}
+function muVol(){if(MU.node)MU.node.gain.setTargetAtTime(MU.on?MU.vol*.55:0,AC.currentTime,.15)}
+function muDuck(on){if(MU.duck)MU.duck.gain.setTargetAtTime(on?.35:1,AC.currentTime,.12)}
+function env(g,t,a,pk,dec){g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(pk,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+a+dec)}
+function drum(t,f0,f1,pk,dec,nz){const c=AC,o=c.createOscillator(),g=c.createGain();o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f1,t+dec*.8);o.connect(g);g.connect(MU.node);env(g,t,.003,pk,dec);o.start(t);o.stop(t+dec+.05);
+ if(nz){const sN=c.createBufferSource(),f=c.createBiquadFilter(),gn=c.createGain();sN.buffer=MU.noise;f.type='bandpass';f.frequency.value=nz;f.Q.value=1.2;sN.connect(f);f.connect(gn);gn.connect(MU.node);env(gn,t,.002,pk*.5,.06);sN.start(t,Math.random()*.5);sN.stop(t+.1)}}
+function ching(t,open){const c=AC;[3150,4420,5300].forEach((fq,i)=>{const o=c.createOscillator(),g=c.createGain();o.frequency.value=fq;o.connect(g);g.connect(MU.node);env(g,t,.002,open?.05/(i+1):.03/(i+1),open?.9:.07);o.start(t);o.stop(t+1)})}
+function gong(t){const c=AC;[98,148,233].forEach((fq,i)=>{const o=c.createOscillator(),g=c.createGain();o.frequency.value=fq;o.connect(g);g.connect(MU.node);env(g,t,.01,.22/(i+1),1.8);o.start(t);o.stop(t+2)})}
+const SCALE=[0,2,4,7,9,12,14,16,19,21,24];let deg=4;
+function piNote(t,dur,fast){const p=MU.pi;if(!p)return;
+ if(Math.random()<(fast?.12:.18)){p.g.gain.setTargetAtTime(.0001,t,.02);return}
+ const stepMove=fast?pick([-2,-1,-1,1,1,2,0]):pick([-1,1,0,2,-2]);deg=clamp(deg+stepMove,1,SCALE.length-2);if(deg<=2)deg+=2;if(deg>=SCALE.length-2)deg-=2;
+ const f=293.66*Math.pow(2,SCALE[deg]/12),fg=293.66*Math.pow(2,SCALE[Math.min(SCALE.length-1,deg+1)]/12);
+ // grace-note ornament then main note
+ if(Math.random()<.45){p.o1.frequency.setTargetAtTime(fg,t,.008);p.o2.frequency.setTargetAtTime(fg,t,.008);p.o1.frequency.setTargetAtTime(f,t+Math.min(.05,dur*.3),.012);p.o2.frequency.setTargetAtTime(f,t+Math.min(.05,dur*.3),.012)}
+ else{p.o1.frequency.setTargetAtTime(f,t,.015);p.o2.frequency.setTargetAtTime(f,t,.015)}
+ p.g.gain.setTargetAtTime(fast?.13:.1,t,.02);p.g.gain.setTargetAtTime(fast?.09:.06,t+dur*.6,.05)}
+function muSched(){const c=AC;if(!c)return;const fight=S.phase==='fight',bpm=fight?150:84,sp=60/bpm/4;
+ while(MU.next<c.currentTime+.12){const t=MU.next,st=MU.step;
+  if(fight){if([0,3,6,8,11,14].includes(st))drum(t,140,70,.5,.16);if([2,4,10,12,13].includes(st))drum(t,360,300,.28,.08,1800);
+   if(st%4===0)ching(t,st%8===0);if(st%2===0)piNote(t,sp*2,true)}
+  else{if([0,6,10].includes(st))drum(t,130,65,.45,.22);if([4,12,14].includes(st))drum(t,340,290,.22,.1,1600);
+   if(st===0)ching(t,true);if(st===8)ching(t,false);if(st===0&&MU.bar%4===0)gong(t);if(st%4===0)piNote(t,sp*4,false)}
+  MU.next+=sp;MU.step=(st+1)%16;if(MU.step===0)MU.bar++}}
 /* ---------- rounds ---------- */
 const CFG={auto:true,lobby:60,fight:150};S.phase='lobby';S.timer=CFG.lobby;S.lastSec=null;
 function bell(){const c=au();if(!c)return;for(let k=0;k<3;k++){const t=c.currentTime+k*.28;[1180,1770].forEach((fq,i)=>{const o=c.createOscillator(),g=c.createGain();o.frequency.value=fq;g.gain.setValueAtTime(i?.08:.18,t);g.gain.exponentialRampToValueAtTime(.001,t+.9);o.connect(g);g.connect(c.destination);o.start(t);o.stop(t+1)})}}
@@ -301,13 +335,16 @@ wsConnect();
 $('bGo').onclick=()=>startFight();
 $('bAuto').onclick=()=>{CFG.auto=!CFG.auto;$('bAuto').textContent='โหมด: '+(CFG.auto?'นับถอยหลัง':'กดเริ่มเอง');if(CFG.auto&&S.phase==='lobby')S.timer=CFG.lobby};
 $('bLob').onclick=()=>{const L=[30,60,90,120,180];CFG.lobby=L[(L.indexOf(CFG.lobby)+1)%L.length];$('bLob').textContent=`รอ ${CFG.lobby} วิ`;if(S.phase==='lobby')S.timer=CFG.lobby};
+function muLabel(){$('bMu').textContent='🎵 เพลง: '+(MU.on?'เปิด':'ปิด');$('bMv').textContent='ความดัง '+Math.round(MU.vol*100)+'%'}muLabel();
+$('bMu').onclick=()=>{MU.on=!MU.on;try{localStorage.setItem('box_mu',MU.on?'1':'0')}catch(e){}muInit();muVol();muLabel()};
+$('bMv').onclick=()=>{const L=[.3,.45,.6,.8,1];MU.vol=L[(L.findIndex(v=>v>=MU.vol-.01)+1)%L.length];try{localStorage.setItem('box_mv',MU.vol)}catch(e){}muVol();muLabel()};
 $('gear').onclick=()=>$('sim').classList.toggle('hide');
 $('bHide').onclick=()=>{$('sim').classList.add('hide');document.body.classList.add('live')};
 let taps=[];$('hot').addEventListener('pointerdown',()=>{const n=Date.now();taps=taps.filter(t=>n-t<900);taps.push(n);if(taps.length>=3){taps=[];document.body.classList.remove('live');$('sim').classList.remove('hide')}});
 function voiceStatus(){const el=$('vst');if(!('speechSynthesis' in window)){el.textContent='🔇 แอปนี้ไม่รองรับเสียงพูด — เปิดลิงก์ใน Chrome';return}pickVoice();const n=speechSynthesis.getVoices().length;
  el.textContent=V.voice?('🔊 เสียงพากย์พร้อม: '+V.voice.name):(n?'⚠️ ไม่พบเสียงภาษาไทย — ติดตั้ง Google Text-to-Speech (ไทย)':'⚠️ ยังไม่พบเสียง — กดทดสอบเสียงอีกครั้ง หรือเปิดใน Chrome')}
 setTimeout(voiceStatus,800);if('speechSynthesis' in window)speechSynthesis.addEventListener&&speechSynthesis.addEventListener('voiceschanged',voiceStatus);
-$('bVoice').onclick=()=>{au();try{speechSynthesis.cancel()}catch(e){}V.busy=false;V.q=[];say('ทดสอบเสียงพากย์ หนึ่ง สอง สาม ชก!',3);setTimeout(voiceStatus,300)};
+$('bVoice').onclick=()=>{au();muInit();try{speechSynthesis.cancel()}catch(e){}V.busy=false;V.q=[];say('ทดสอบเสียงพากย์ หนึ่ง สอง สาม ชก!',3);setTimeout(voiceStatus,300)};
 /* ---------- quick sim buttons ---------- */
 const NM=['น้องฝน','Beam','ป้าแดง','ลุงดู่','Aom','Plo','เจ๊หมวย','Nok','มะปราง','ต้นกล้า','แม่ค้า','Zin','ก้อย','บอย','ใบเตย','โอ๊ต','แจ็ค','มิว','เบล','ต้า','นัท','กิ๊ฟ','ปาล์ม','ฟ้า'];let ni=0;
 document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{const k=b.dataset.s,live=S.f.filter(f=>!f.ko),r=live.length?pick(live):null;
