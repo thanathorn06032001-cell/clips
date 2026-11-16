@@ -50,7 +50,7 @@ async function connectTo(username) {
   });
   conn = c;
 
-  c.on(WebcastEvent.CHAT, d => broadcast({ type: 'chat', ...who(d), comment: d.comment || '' }));
+  c.on(WebcastEvent.CHAT, d => { console.log('[chat]', d?.user?.uniqueId, d.comment); broadcast({ type: 'chat', ...who(d), comment: d.comment || '' }); });
   c.on(WebcastEvent.MEMBER, d => broadcast({ type: 'member', ...who(d) }));
   c.on(WebcastEvent.LIKE, d => broadcast({ type: 'like', ...who(d), count: d.likeCount || 1, total: d.totalLikeCount || 0 }));
   c.on(WebcastEvent.FOLLOW, d => broadcast({ type: 'follow', ...who(d) }));
@@ -58,6 +58,7 @@ async function connectTo(username) {
   c.on(WebcastEvent.GIFT, d => {
     const giftType = d.giftDetails?.giftType;
     if (giftType === 1 && !d.repeatEnd) return; // รอให้คอมโบจบก่อน ค่อยนับทีเดียว
+    console.log('[gift]', d?.user?.uniqueId, d.giftDetails?.giftName, d.repeatCount);
     broadcast({
       type: 'gift', ...who(d),
       giftName: d.giftDetails?.giftName || 'ของขวัญ',

@@ -89,6 +89,8 @@ body.hidePanel #panel{display:none}
     <input type="text" id="ttUser" placeholder="เช่น myshop123">
     <div class="row"><button id="bConn">เชื่อมต่อ</button><button class="alt" id="bDisc">ตัดการเชื่อมต่อ</button></div>
     <div id="status">กำลังหาเซิร์ฟเวอร์…</div>
+    <label>เหตุการณ์ล่าสุดจาก TikTok</label>
+    <div id="evlog" style="font-size:13px;background:#1e1215;border-radius:8px;padding:6px 8px;max-height:140px;overflow:auto;color:#ccc">ยังไม่มี</div>
     <label>ที่อยู่เซิร์ฟเวอร์ (ปกติไม่ต้องแก้)</label>
     <input type="text" id="srv" placeholder="wss://…">
 
@@ -124,6 +126,10 @@ body.hidePanel #panel{display:none}
     <div class="row"><button class="alt" id="bTestVoice">ทดสอบเสียงพูด</button></div>
     <div id="voiceInfo" style="font-size:13px;color:#aaa"></div>
 
+    <h4>🧍 ตัวละคร</h4>
+    <label>ไม่พิมพ์/ไม่กดหัวใจนานกี่นาที ถึงให้ตัวละครเดินออก</label>
+    <input type="number" id="idleMin" value="3" min="1" max="60">
+
     <h4>🎯 เป้าหมาย</h4>
     <label>เป้าธูปรวม</label>
     <input type="number" id="goalN" value="300" min="10">
@@ -136,7 +142,7 @@ body.hidePanel #panel{display:none}
       <div class="ov box" id="wishes"><h3>🙏 คำขอพรล่าสุด</h3><div id="wl"><div class="w">พิมพ์คำขอพรในคอมเมนต์ได้เลย</div></div></div>
       <div class="ov box" id="top5"><h3>🏮 Top 5 ผู้ร่วมบุญ</h3><div id="tl"></div></div>
       <div class="ov box" id="menu"><h3>🪔 ถวายของ = ของขวัญ</h3><div id="ml"></div></div>
-      <div class="ov box" id="howto"><h3>📜 วิธีร่วมสนุก</h3>💬 "สาธุ" = รับพร<br>🎋 "เซียมซี" = เสี่ยงเซียมซีฟรี<br>✍️ พิมพ์คำขอพรขึ้นกระดาน<br>❤️ กดหัวใจ = กลีบบัวทองลอย</div>
+      <div class="ov box" id="howto"><h3>📜 วิธีร่วมสนุก</h3>💬 "สาธุ" = เข้าไปนั่งไหว้ + รับพร<br>🎋 "เซียมซี" = เสี่ยงเซียมซีฟรี<br>✍️ พิมพ์คำขอพรขึ้นกระดาน<br>❤️ กดหัวใจ = กลีบบัวทองลอย</div>
       <div class="ov" id="toasts"></div>
       <div class="ov" id="banner"><div class="box"><h2 id="bnT"></h2><p id="bnP"></p></div></div>
       <div class="ov" id="seamsi"><div class="box"><div>🎋 เซียมซีใบที่</div><div class="no" id="sNo"></div><div class="txt" id="sTxt"></div><div class="who" id="sWho"></div></div></div>
@@ -367,7 +373,8 @@ buildBg();
 const S={t:0,glow:0,rays:0,sticks:[],parts:[],people:{},order:[],items:[],firecr:[],seamsiCup:0};
 const stars=FAIRY;
 const lanterns=[];
-const SLOTS=[];for(let r=0;r<4;r++)for(let c=0;c<6;c++){SLOTS.push({x:90+c*108+(r%2?54:0)-(r%2?20:0),y:1040+r*58})}
+const SLOTS=[];for(let r=0;r<5;r++)for(let c=0;c<8;c++){SLOTS.push({x:48+c*86+(r%2?40:0),y:1030+r*42})}
+const IDLE={min:3};
 
 function addStick(dragon=false){const s={x:360+rnd(-78,78),y:906+rnd(-6,6),h:dragon?210:rnd(95,130),born:S.t,life:dragon?160:rnd(80,110),dragon};S.sticks.push(s);if(S.sticks.length>70)S.sticks.shift()}
 function addItem(kind){const xs=[180,230,280,440,490,540,320,400];const it={kind,x:pick(xs)+rnd(-12,12),born:S.t};S.items.push(it);if(S.items.length>14)S.items.shift()}
@@ -378,16 +385,20 @@ function coinRain(n){for(let i=0;i<n;i++)part({type:'coin',x:rnd(20,W-20),y:rnd(
 function petals(n,x0){for(let i=0;i<n;i++)part({type:'petal',x:x0??rnd(480,700),y:H-rnd(80,180),vx:rnd(-50,10),vy:rnd(-160,-90),life:rnd(3,5),max:5,size:rnd(7,12),rot:rnd(0,6),vr:rnd(-2,2)})}
 function firecrackers(side){const x0=side<0?40:680;for(let i=0;i<22;i++)S.firecr.push({x:x0+rnd(-25,25),y:880+i*9+rnd(-4,4),at:S.t+i*.09});}
 
-function person(id,nick){let p=S.people[id];if(p){p.nick=nick;return p}
- const used=new Set(Object.values(S.people).map(q=>q.slot));let slot=SLOTS.findIndex((s,i)=>!used.has(i));
- if(slot<0){const old=S.order.shift();slot=S.people[old].slot;delete S.people[old]}
+function touch(id){const p=S.people[id];if(p&&p.state!=='leave'){p.last=Date.now();return p}return null}
+function leave(p){if(p.state==='leave')return;p.state='leave';p.tx=p.x<360?-60:W+60;p.bubble=null}
+function person(id,nick){let p=S.people[id];if(p&&p.state!=='leave'){p.nick=nick;p.last=Date.now();return p}
+ if(p){delete S.people[id];S.order=S.order.filter(x=>x!==id)}
+ const used=new Set(Object.values(S.people).filter(q=>q.state!=='leave').map(q=>q.slot));let slot=SLOTS.findIndex((s,i)=>!used.has(i));
+ if(slot<0){let old=null;for(const q of Object.values(S.people))if(q.state!=='leave'&&(!old||q.last<old.last))old=q;slot=old.slot;leave(old)}
  const sl=SLOTS[slot],fromLeft=sl.x<360;
- p=S.people[id]={id,nick,slot,x:fromLeft?-40:W+40,y:sl.y,tx:sl.x,state:'walk',girl:Math.random()<.5,shirt:pick(['#f2f2f2','#ffd36b','#ff8fb0','#8fd3ff','#c9a0ff','#ff7a59']),bow:0,bubble:null,bubbleT:0,hair:pick(['#1a0d08','#3b2014','#111'])};
+ p=S.people[id]={id,nick,slot,last:Date.now(),x:fromLeft?-40:W+40,y:sl.y,tx:sl.x,state:'walk',girl:Math.random()<.5,shirt:pick(['#f2f2f2','#ffd36b','#ff8fb0','#8fd3ff','#c9a0ff','#ff7a59']),bow:0,bubble:null,bubbleT:0,hair:pick(['#1a0d08','#3b2014','#111'])};
  S.order.push(id);return p}
+setInterval(()=>{const lim=IDLE.min*60000,n=Date.now();for(const q of Object.values(S.people))if(q.state!=='leave'&&n-q.last>lim)leave(q)},5000);
 function bubble(p,text){p.bubble=text;p.bubbleT=S.t+3}
 
-function drawPerson(p){const s=.78+(p.y-1040)/174*.28;const x=p.x,y=p.y;ctx.save();ctx.translate(x,y);ctx.scale(s,s);
- const walk=p.state=='walk';const bob=walk?Math.abs(Math.sin(S.t*10))*-4:0;const bow=p.bow>0?Math.sin(Math.min(1,p.bow)*Math.PI)*.35:0;
+function drawPerson(p){const s=.6+(p.y-1032)/160*.2;const x=p.x,y=p.y;ctx.save();ctx.translate(x,y);ctx.scale(s,s);
+ const walk=p.state=='walk'||p.state=='leave';const bob=walk?Math.abs(Math.sin(S.t*10))*-4:0;const bow=p.bow>0?Math.sin(Math.min(1,p.bow)*Math.PI)*.35:0;
  ctx.fillStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.ellipse(0,2,26,7,0,0,7);ctx.fill();
  if(walk){ctx.strokeStyle='#2a2a3a';ctx.lineWidth=7;ctx.lineCap='round';const a=Math.sin(S.t*10)*8;ctx.beginPath();ctx.moveTo(-6,-22);ctx.lineTo(-6+a,0);ctx.moveTo(6,-22);ctx.lineTo(6-a,0);ctx.stroke()}
  else{ctx.fillStyle=p.girl?'#b0306a':'#2d4a8a';ctx.beginPath();ctx.ellipse(0,-8,24,11,0,0,7);ctx.fill()}
@@ -406,8 +417,8 @@ function drawPerson(p){const s=.78+(p.y-1040)/174*.28;const x=p.x,y=p.y;ctx.save
  ctx.fillStyle='rgba(255,120,120,.4)';ctx.beginPath();ctx.arc(-12,-42,4,0,7);ctx.arc(12,-42,4,0,7);ctx.fill();
  ctx.restore();
  // label
- ctx.font='500 15px Mitr, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';const lw=ctx.measureText(p.nick).width+14,ly=y-(walk?100:92)*s;
- ctx.fillStyle='rgba(30,4,8,.75)';rr(x-lw/2,ly-11,lw,22,11);ctx.fill();ctx.fillStyle='#fff';ctx.fillText(p.nick,x,ly);
+ const showName=Date.now()-p.last<60000||(p.bubble&&S.t<p.bubbleT);if(!showName)return;const nm=p.nick.length>8?p.nick.slice(0,8)+'…':p.nick;ctx.font='500 16px Mitr, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';const lw=ctx.measureText(nm).width+14,ly=y-(walk?100:92)*s;
+ ctx.fillStyle='rgba(30,4,8,.75)';rr(x-lw/2,ly-11,lw,22,11);ctx.fill();ctx.fillStyle='#fff';ctx.fillText(nm,x,ly);
  if(p.bubble&&S.t<p.bubbleT){ctx.font='500 17px Mitr, sans-serif';const bw=ctx.measureText(p.bubble).width+18,by=ly-30;ctx.fillStyle='#fff8e6';rr(x-bw/2,by-14,bw,28,12);ctx.fill();ctx.fillStyle='#5a1a0e';ctx.fillText(p.bubble,x,by)}
 }
 function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}
@@ -466,7 +477,7 @@ function drawFirecr(){for(let i=S.firecr.length-1;i>=0;i--){const f=S.firecr[i];
 let last=performance.now();
 function frame(now){if(now-last<30){requestAnimationFrame(frame);return}const dt=Math.min(.05,(now-last)/1000);last=now;S.t+=dt;ctx.setTransform(1,0,0,1,0,0);ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
  S.glow=Math.max(0,S.glow-dt*.25);S.rays=Math.max(0,S.rays-dt*.12);
- for(const id of S.order){const p=S.people[id];if(!p)continue;if(p.state=='walk'){const d=p.tx-p.x;p.x+=Math.sign(d)*Math.min(Math.abs(d),150*dt);if(Math.abs(d)<2){p.state='kneel';p.bow=.01}}if(p.bow>0){p.bow+=dt*1.2;if(p.bow>1)p.bow=0}}
+ for(const id of [...S.order]){const p=S.people[id];if(!p)continue;if(p.state=='walk'||p.state=='leave'){const d=p.tx-p.x;p.x+=Math.sign(d)*Math.min(Math.abs(d),170*dt);if(Math.abs(d)<2){if(p.state=='leave'){delete S.people[id];S.order=S.order.filter(x=>x!==id);continue}p.state='kneel';p.bow=.01}}if(p.bow>0){p.bow+=dt*1.2;if(p.bow>1)p.bow=0}}
  S.sticks=S.sticks.filter(s=>S.t-s.born<s.life);
  updateParts(dt);
  drawSky();
@@ -501,17 +512,20 @@ function runSeamsi(){if(SQ.busy||!SQ.q.length)return;SQ.busy=true;const nick=SQ.
  let k=0;const iv=setInterval(()=>{$('sNo').textContent=1+Math.floor(Math.random()*28);if(++k>10){clearInterval(iv);$('sNo').textContent=n+1;$('sTxt').textContent=SEAMSI[n];SFX.chime(4);burst(360,600,30,['#ffd36b','#fff']);say(`เซียมซีของคุณ${nick} ใบที่ ${n+1} ${SEAMSI[n]}`,1)}},90);
  setTimeout(()=>{el.style.display='none';SQ.busy=false;setTimeout(runSeamsi,300)},6500)}
 
-function handle(e){const nick=cleanName(e.nick||e.user),id=e.user||nick;
+const SATU=/ส[าะ]?[ธทถ]ุ|สาทุ|สาทู|สาธู|satu|sathu|sadhu|99|๙๙|🙏/i;
+const EVN={member:'เข้า',chat:'💬',like:'❤️',follow:'ติดตาม',share:'แชร์',gift:'🎁'};const EVL=[];
+function logEv(e){if(e.type==='like'||e.type==='member')return;EVL.unshift(`${EVN[e.type]||e.type} ${cleanName(e.nick||e.user)}${e.comment?': '+String(e.comment).slice(0,30):''}${e.giftName?': '+e.giftName+' x'+(e.count||1):''}`);EVL.length=Math.min(EVL.length,8);const el=$('evlog');if(el){el.style.whiteSpace='pre-line';el.textContent=EVL.join('\n')}}
+function handle(e){logEv(e);const nick=cleanName(e.nick||e.user),id=e.user||nick;
  switch(e.type){
- case 'member':{const p=person(id,nick);SFX.bell();toast(`👋 <b>${esc(nick)}</b> เข้ามาไหว้ศาล`);if(Date.now()-V.lastJoin>7000){V.lastJoin=Date.now();say(`ยินดีต้อนรับคุณ${nick} ค่ะ`,0)}break}
- case 'chat':{const t=clean(e.comment).trim();if(!t)return;const p=person(id,nick);
-  if(/เซียมซี|เซียม/.test(t)){seamsi(id,nick);bubble(p,'🎋 เซียมซี');return}
-  if(/สาธุ|99|๙๙/.test(t)){p.bow=.01;bubble(p,'สาธุ 🙏');textPop(p.x,p.y-130,'สาธุ 🙏','#ffd36b',26);S.glow=Math.min(1,S.glow+.08);SFX.sparkle();addScore(nick,1);return}
-  if(/หวย|เลขเด็ด|ใบ้|งวด/.test(t)){bubble(p,'🙏');return}
-  bubble(p,t.length>14?t.slice(0,14)+'…':t);addWish(nick,t);if(V.chat)say(`คุณ${nick} ขอพรว่า ${t}`,0);break}
- case 'like':{const n=Math.min(25,e.count||1);petals(n);if(e.total&&Math.floor(e.total/500)>Math.floor((e.total-(e.count||1))/500)){textPop(560,1000,`❤️ ${e.total} หัวใจ`,'#ff9fb8',28);say('ขอบคุณสำหรับหัวใจทุกดวงนะคะ',0)}break}
- case 'follow':{const p=person(id,nick);addItem('garland');SFX.chime(3);toast(`💐 <b>${esc(nick)}</b> ติดตามแล้ว — ถวายพวงมาลัย`);say(`ขอบคุณคุณ${nick} ที่กดติดตามนะคะ`,1);bubble(p,'💐 ติดตามแล้ว');break}
- case 'share':{const p=person(id,nick);firecrackers(Math.random()<.5?-1:1);toast(`🧨 <b>${esc(nick)}</b> แชร์ไลฟ์ — จุดประทัด!`);say(`ขอบคุณคุณ${nick} ที่แชร์ไลฟ์ค่ะ`,1);bubble(p,'🧨 แชร์แล้ว');break}
+ case 'member':{touch(id);break}
+ case 'chat':{const t=clean(e.comment).trim();if(!t)return;let p=touch(id);
+  if(/เซียมซี|เซียม|ซีเซียม/.test(t)){seamsi(id,nick);if(p)bubble(p,'🎋 เซียมซี');return}
+  if(SATU.test(t)){const isNew=!p;p=person(id,nick);if(isNew&&Date.now()-V.lastJoin>9000){V.lastJoin=Date.now();say(`สาธุค่ะ คุณ${nick}`,0)}p.bow=.01;bubble(p,'สาธุ 🙏');textPop(p.x,p.y-130,'สาธุ 🙏','#ffd36b',26);S.glow=Math.min(1,S.glow+.08);SFX.sparkle();addScore(nick,1);return}
+  if(/หวย|เลขเด็ด|ใบ้|งวด/.test(t)){if(p)bubble(p,'🙏');return}
+  if(p)bubble(p,t.length>14?t.slice(0,14)+'…':t);addWish(nick,t);if(V.chat)say(`คุณ${nick} ขอพรว่า ${t}`,0);break}
+ case 'like':{touch(id);const n=Math.min(25,e.count||1);petals(n);if(e.total&&Math.floor(e.total/500)>Math.floor((e.total-(e.count||1))/500)){textPop(560,1000,`❤️ ${e.total} หัวใจ`,'#ff9fb8',28);say('ขอบคุณสำหรับหัวใจทุกดวงนะคะ',0)}break}
+ case 'follow':{const p=touch(id);addItem('garland');SFX.chime(3);toast(`💐 <b>${esc(nick)}</b> ติดตามแล้ว — ถวายพวงมาลัย`);say(`ขอบคุณคุณ${nick} ที่กดติดตามนะคะ`,1);if(p)bubble(p,'💐 ติดตามแล้ว');break}
+ case 'share':{const p=touch(id);firecrackers(Math.random()<.5?-1:1);toast(`🧨 <b>${esc(nick)}</b> แชร์ไลฟ์ — จุดประทัด!`);say(`ขอบคุณคุณ${nick} ที่แชร์ไลฟ์ค่ะ`,1);if(p)bubble(p,'🧨 แชร์แล้ว');break}
  case 'gift':{const cnt=Math.max(1,e.count||1),dia=Math.max(1,e.diamonds||1),tot=dia*cnt,ti=tierOf(dia),T=TIERS[ti],p=person(id,nick);
   p.bow=.01;bubble(p,`${T.icon} ${e.giftName||'ของขวัญ'} x${cnt}`);addScore(nick,tot);
   const n=Math.min(30,T.sticks*cnt);for(let i=0;i<Math.min(n,ti>=3?8:12);i++)setTimeout(()=>addStick(false),i*120);
@@ -566,6 +580,7 @@ let taps=[];$('hot').addEventListener('pointerdown',()=>{const n=Date.now();taps
 addEventListener('keydown',e=>{if(e.target.tagName=='INPUT')return;if(e.key=='h'||e.key=='H'){const hidden=document.body.classList.contains('hidePanel');document.body.classList.toggle('hidePanel',!hidden);document.body.classList.toggle('closedDrawer',!hidden);setTimeout(fit,30)}});
 $('bFull').onclick=()=>{const d=document.documentElement;(d.requestFullscreen||d.webkitRequestFullscreen||(()=>{})).call(d);setTimeout(fit,300)};
 $('bReset').onclick=()=>{S.sticks=[];S.parts=[];S.people={};S.order=[];S.items=[];G.score={};G.now=0;G.max=+$('goalN').value||300;store.set('score',{});store.set('gnow',0);store.set('gmax',G.max);G.wishes=[];$('wl').innerHTML='';hudTop();hudGoal()};
+IDLE.min=store.get('idle',3);$('idleMin').value=IDLE.min;$('idleMin').onchange=e=>{IDLE.min=Math.max(1,+e.target.value||3);store.set('idle',IDLE.min)};
 $('goalN').value=G.max;$('goalN').onchange=e=>{G.max=Math.max(10,+e.target.value||300);store.set('gmax',G.max);hudGoal()};
 A.on=store.get('mOn',true);A.vol=store.get('mVol',55)/100;$('musicOn').checked=A.on;$('musicVol').value=A.vol*100;
 $('musicOn').onchange=e=>{A.on=e.target.checked;store.set('mOn',A.on);musicVol()};$('musicVol').oninput=e=>{A.vol=e.target.value/100;store.set('mVol',+e.target.value);musicVol()};
