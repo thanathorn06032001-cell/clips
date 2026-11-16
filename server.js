@@ -32,6 +32,8 @@ function broadcast(obj) {
   for (const c of wss.clients) if (c.readyState === 1) c.send(s);
 }
 function status(text) { lastStatus = text; broadcast({ type: 'status', text }); console.log('[status]', text); }
+// ราคาเพชรสำรอง เผื่อข้อมูลของขวัญไม่ส่งราคามา
+const GIFT_PRICE = { rose: 1, tiktok: 1, 'finger heart': 5, 'heart me': 1, perfume: 20, doughnut: 30, 'hand hearts': 100, corgi: 299, 'money gun': 500, galaxy: 1000, lion: 29999, universe: 34999 };
 const who = d => ({ user: d?.user?.uniqueId || '', nick: d?.user?.nickname || d?.user?.uniqueId || 'ผู้ชม' });
 
 async function connectTo(username) {
@@ -42,7 +44,7 @@ async function connectTo(username) {
   if (conn) { try { conn.disconnect(); } catch {} conn = null; }
   status(`กำลังเชื่อม @${username}…`);
   const c = new TikTokLiveConnection(username, {
-    enableExtendedGiftInfo: true,
+    enableExtendedGiftInfo: false, // ต้องใช้แผนเสียเงินของ Euler — ไม่จำเป็น
     processInitialData: false,
     signApiKey: process.env.EULER_API_KEY || undefined,
   });
@@ -58,8 +60,8 @@ async function connectTo(username) {
     if (giftType === 1 && !d.repeatEnd) return; // รอให้คอมโบจบก่อน ค่อยนับทีเดียว
     broadcast({
       type: 'gift', ...who(d),
-      giftName: d.giftDetails?.giftName || d.extendedGiftInfo?.name || 'ของขวัญ',
-      diamonds: d.giftDetails?.diamondCount || d.extendedGiftInfo?.diamond_count || 1,
+      giftName: d.giftDetails?.giftName || 'ของขวัญ',
+      diamonds: d.giftDetails?.diamondCount || d.gift?.diamondCount || GIFT_PRICE[(d.giftDetails?.giftName || '').toLowerCase()] || 1,
       count: d.repeatCount || 1,
     });
   });
