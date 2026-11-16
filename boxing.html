@@ -75,6 +75,7 @@ body.live #gear{display:none}
  <div class="st" id="vst">🔊 กำลังเช็กเสียง…</div>
  <div class="row"><input id="ttUser" placeholder="ชื่อ TikTok"><button id="bConn">เชื่อมต่อ</button></div>
  <div class="st" id="wst">โหมดทดสอบ</div>
+ <div class="st" id="dbg" style="color:#9fe;max-width:330px;white-space:pre-wrap;word-break:break-all">📨 ยังไม่มีข้อมูลเข้าจาก TikTok</div>
  <div class="row">ทดสอบ: <button data-s="join5">+5 ลง</button><button data-s="heal">เลือด</button><button data-s="pow">ตี</button><button data-s="rose">🌹</button><button data-s="gold">🥊</button><button data-s="pan">🍳</button><button data-s="giant">🌌</button><button data-s="whale">🐋</button></div>
 </div>
 <script>
@@ -137,9 +138,10 @@ $('gl').innerHTML=GIFTS.slice().reverse().map(g=>`<div class="m"><i>${g.icon}</i
 function giftFallback(f,d){if(d>=500){f.giant=1;f.max=300;f.hp=300}else if(d>=100)f.weap=pick(['knuckle','hammer','fish','pan']);else if(d>=10){f.pow=Math.max(f.pow,.5);f.powT=9999}else f.hp=Math.min(f.max,f.hp+15*d)}
 /* ---------- events (same format as shrine server) ---------- */
 const CD={};function cool(k,s){const n=Date.now();if(CD[k]&&n-CD[k]<s*1000)return false;CD[k]=n;return true}
-function handle(e){const id=e.user||e.nick,nick=String(e.nick||'ผู้ชม').slice(0,14);
+let dbgN=0,dbgL=[];function dbg(e){dbgN++;if(e.type==='like')return;dbgL.unshift((e.type==='chat'?'💬 ':e.type==='gift'?'🎁 ':'• ')+(e.nick||e.user||'?')+': '+(e.comment||e.giftName||e.type));dbgL.length=Math.min(dbgL.length,4);const d=document.getElementById('dbg');if(d)d.textContent='📨 ได้รับ '+dbgN+' รายการ\n'+dbgL.join('\n')}
+function handle(e){if(e&&e._sim!==1)dbg(e);const id=e.user||e.nick,nick=String(e.nick||'ผู้ชม').slice(0,14);
  if(e.type==='chat'){const t=String(e.comment||'');
-  if(/^\s*(ลง|ขึ้นเวที|เข้า|join|1)\s*$/i.test(t)||/ลงเวที/.test(t)){const f=fighter(id,nick,e.avatar);if(f)txt(...toXY(f.tu,f.v),'ขึ้นเวที!','#fff');return}
+  const tc=t.replace(/[\u200b-\u200f\ufeff\s.!~,]+/g,' ').trim();if(/^(ลง|ลงๆ+|ลงค่ะ|ลงครับ|ขึ้นเวที|เข้า|join|1)( |$)/i.test(tc)||/ลงเวที|ลงด้วย/.test(tc)){const f=fighter(id,nick,e.avatar);if(f)txt(...toXY(f.tu,f.v),'ขึ้นเวที!','#fff');return}
   const f=S.f.find(x=>x.id===id&&!x.ko);if(!f)return;const [x,y]=toXY(f.u,f.v);
   if(S.phase!=='lobby'){if(/เลือด|ฮีล|heal|\+|ตี|ดาเมจ|ต่อย|power|แรง/i.test(t)&&cool(id+'lk',8))txt(x,y-130*scl(f.v),'🔒 ชกอยู่ บัฟไม่ได้','#aaa',18);return}
   if(/เลือด|ฮีล|heal|\+/i.test(t)&&cool(id+'h',5)){f.hp=Math.min(f.max,f.hp+15);txt(x,y-130*scl(f.v),'+15','#5dff7a')}

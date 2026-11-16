@@ -62,6 +62,7 @@ body.live #gear{display:none}#hot{position:fixed;left:0;top:0;width:70px;height:
  <div class="row"><button id="bVoice">🔊 ทดสอบเสียง</button><span class="st" id="vst"></span></div>
  <div class="row"><input id="ttUser" placeholder="ชื่อ TikTok"><button id="bConn">เชื่อมต่อ</button></div>
  <div class="st" id="wst">โหมดทดสอบ</div>
+ <div class="st" id="dbg" style="color:#9fe;max-width:330px;white-space:pre-wrap;word-break:break-all">📨 ยังไม่มีข้อมูลเข้าจาก TikTok</div>
  <div class="row">ทดสอบ: <button data-s="join">+6 คนเต้น</button><button data-s="mun">💬ม่วน/โย่ x6</button><button data-s="ms">🎯ภารกิจ</button><button data-s="rose10">🌹x10</button><button data-s="like">❤️</button><button data-s="rose">🌹</button><button data-s="tiktok">🎵</button><button data-s="donut">🍩</button><button data-s="hands">🫶</button><button data-s="money">💸</button><button data-s="galaxy">🎤</button><button data-s="whale">🐋</button><button data-s="universe">🌌</button></div>
 </div>
 <script>
@@ -295,7 +296,8 @@ function msTick(){if(S.ms){const m=S.ms;$('msB').style.width=Math.min(100,m.have
  else if(S.t>S.msNext&&S.crowd.length>=1)msStart()}
 /* ---------- events ---------- */
 const CD={};const cool=(k,s)=>{const n=Date.now();if(CD[k]&&n-CD[k]<s*1000)return false;CD[k]=n;return true};
-function handle(e){const id=e.user||e.nick,nick=String(e.nick||'เพื่อน').slice(0,16);
+let dbgN=0,dbgL=[];function dbg(e){dbgN++;if(e.type==='like')return;dbgL.unshift((e.type==='chat'?'💬 ':e.type==='gift'?'🎁 ':'• ')+(e.nick||e.user||'?')+': '+(e.comment||e.giftName||e.type));dbgL.length=Math.min(dbgL.length,4);const d=document.getElementById('dbg');if(d)d.textContent='📨 ได้รับ '+dbgN+' รายการ\n'+dbgL.join('\n')}
+function handle(e){if(e&&e._sim!==1)dbg(e);const id=e.user||e.nick,nick=String(e.nick||'เพื่อน').slice(0,16);
  if(e.type==='chat'){const t=String(e.comment||'');const isNew=!S.crowd.find(c=>c.id===id);
   if(S.ms){if(S.ms.k==='word'&&S.ms.re.test(t))msAdd('word',1);if(S.ms.k==='uniq'&&S.ms.re.test(t))msAdd('uniq',1,id)}
   if(/เต้น|แดนซ์|dance|ซิ่ง|โยก|มันส์/i.test(t)||(isNew&&/ม่วน/.test(t))){const p=join(id,nick,e.avatar);p.hopT=S.t;addFun(isNew?10:3);if(isNew){pts(nick,3);S.joined++;msAdd('join',1);toast(`💃 <b>${esc(nick)}</b> มาเต้นแล้ว!`);if(cool('joinv',8))say(`${clean(nick)} มาแล้ว! ม่วนเลย!`,0)}else if(cool('p'+id,2))pts(nick,1);return}
