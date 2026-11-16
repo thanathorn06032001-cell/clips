@@ -3,6 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="/manifest.json">
 <title>ศาลเจ้าแม่ประทานพร — เกมไลฟ์</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&display=swap" rel="stylesheet">
@@ -12,6 +17,7 @@
 html,body{margin:0;height:100%;background:#0b0507;color:#fff;font-family:'Mitr','Kanit','Noto Sans Thai',sans-serif;overflow:hidden;touch-action:manipulation}
 #wrap{position:fixed;inset:0;display:flex}
 #stageBox{position:relative;flex:1;overflow:hidden}
+#fill{position:absolute;inset:-40px;width:calc(100% + 80px);height:calc(100% + 80px);filter:blur(22px) brightness(.62) saturate(1.2);pointer-events:none}
 #stage{position:absolute;left:0;top:0;width:720px;height:1280px;transform-origin:0 0;overflow:hidden;background:#000}
 #cv{position:absolute;inset:0;width:720px;height:1280px}
 .ov{position:absolute;pointer-events:none}
@@ -139,6 +145,7 @@ body.hidePanel #panel{display:none}
   </div>
 
   <div id="stageBox">
+    <canvas id="fill" width="90" height="160"></canvas>
     <div id="stage">
       <canvas id="cv" width="720" height="1280"></canvas>
       <div class="ov" id="title"><h1>ศาลเจ้าแม่ประทานพร</h1><p>พิมพ์ <b>"สาธุ"</b> รับพร • <b>"เซียมซี"</b> เสี่ยงฟรี • ส่งของขวัญ = จุดธูปถวาย</p></div>
@@ -792,11 +799,15 @@ $('bDisc').onclick=()=>{store.set('autoconn',false);if(ws&&ws.readyState==1)ws.s
 /* ================= controls & layout ================= */
 function fit(){const box=$('stageBox'),k=Math.min(box.clientWidth/W,box.clientHeight/H);const st=$('stage');st.style.transform=`scale(${k})`;st.style.left=(box.clientWidth-W*k)/2+'px';st.style.top=(box.clientHeight-H*k)/2+'px'}
 addEventListener('resize',()=>setTimeout(fit,50));
+const fillCtx=$('fill').getContext('2d');setInterval(()=>{try{fillCtx.drawImage(cv,0,0,90,160)}catch(e){}},250);
+let wakeLock=null;async function keepAwake(){try{if('wakeLock' in navigator&&!document.hidden)wakeLock=await navigator.wakeLock.request('screen')}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)keepAwake()});
+function goFull(){const d=document.documentElement;try{const r=(d.requestFullscreen||d.webkitRequestFullscreen);if(r&&!document.fullscreenElement){const pr=r.call(d,{navigationUI:'hide'});if(pr&&pr.then)pr.then(()=>{try{screen.orientation&&screen.orientation.lock&&screen.orientation.lock('portrait').catch(()=>{})}catch(e){}}).catch(()=>{})}}catch(e){}setTimeout(fit,300)}
 $('gear').onclick=()=>{document.body.classList.toggle('closedDrawer');document.body.classList.remove('hidePanel');setTimeout(fit,30)};
 $('bHide').onclick=()=>{document.body.classList.add('hidePanel');document.body.classList.add('closedDrawer');setTimeout(fit,30)};
 let taps=[];$('hot').addEventListener('pointerdown',()=>{const n=Date.now();taps=taps.filter(t=>n-t<900);taps.push(n);if(taps.length>=3){taps=[];document.body.classList.remove('hidePanel');document.body.classList.remove('closedDrawer');setTimeout(fit,30)}});
 addEventListener('keydown',e=>{if(e.target.tagName=='INPUT')return;if(e.key=='h'||e.key=='H'){const hidden=document.body.classList.contains('hidePanel');document.body.classList.toggle('hidePanel',!hidden);document.body.classList.toggle('closedDrawer',!hidden);setTimeout(fit,30)}});
-$('bFull').onclick=()=>{const d=document.documentElement;(d.requestFullscreen||d.webkitRequestFullscreen||(()=>{})).call(d);setTimeout(fit,300)};
+$('bFull').onclick=()=>goFull();
 $('bReset').onclick=()=>{GOD.gar=[];GOD.roses=[];GOD.moo=[];GOD.whales=[];GOD.fly=[];S.sticks=[];S.parts=[];S.people={};S.order=[];S.items=[];G.score={};G.now=0;G.max=+$('goalN').value||300;store.set('score',{});store.set('gnow',0);store.set('gmax',G.max);G.wishes=[];$('wl').innerHTML='';hudTop();hudGoal()};
 $('themeSel').innerHTML=Object.entries(THEMES).map(([k,t])=>`<option value="${k}">${t.name}</option>`).join('');$('themeSel').value=THEME;$('themeSel').onchange=e=>setTheme(e.target.value);
 IDLE.min=store.get('idle',3);$('idleMin').value=IDLE.min;$('idleMin').onchange=e=>{IDLE.min=Math.max(1,+e.target.value||3);store.set('idle',IDLE.min)};
@@ -806,7 +817,7 @@ $('musicOn').onchange=e=>{A.on=e.target.checked;store.set('mOn',A.on);musicVol()
 V.on=store.get('tOn',true);V.chat=store.get('tChat',false);V.rate=store.get('tRate',105)/100;$('ttsOn').checked=V.on;$('ttsChat').checked=V.chat;$('ttsRate').value=V.rate*100;
 $('ttsOn').onchange=e=>{V.on=e.target.checked;store.set('tOn',V.on)};$('ttsChat').onchange=e=>{V.chat=e.target.checked;store.set('tChat',V.chat)};$('ttsRate').oninput=e=>{V.rate=e.target.value/100;store.set('tRate',+e.target.value)};
 $('bTestVoice').onclick=()=>{audioInit();say('สวัสดีค่ะ ยินดีต้อนรับสู่ศาลเจ้าแม่ประทานพร พิมพ์สาธุเพื่อรับพรได้เลยค่ะ',3)};
-$('bStart').onclick=()=>{$('start').remove();audioInit();if(A.ctx&&A.ctx.state=='suspended')A.ctx.resume();say('สวัสดีค่ะ ยินดีต้อนรับสู่ศาลเจ้าแม่ประทานพร พิมพ์สาธุเพื่อรับพร หรือพิมพ์เซียมซีเพื่อเสี่ยงเซียมซีได้เลยค่ะ',3)};
+$('bStart').onclick=()=>{$('start').remove();goFull();keepAwake();audioInit();if(A.ctx&&A.ctx.state=='suspended')A.ctx.resume();say('สวัสดีค่ะ ยินดีต้อนรับสู่ศาลเจ้าแม่ประทานพร พิมพ์สาธุเพื่อรับพร หรือพิมพ์เซียมซีเพื่อเสี่ยงเซียมซีได้เลยค่ะ',3)};
 hudTop();hudGoal();fit();wsConnect();requestAnimationFrame(frame);
 function bgLost(){try{const g=bg.getContext('2d');if(g.isContextLost&&g.isContextLost())return true;return g.getImageData(4,4,1,1).data[3]===0}catch(e){return true}}
 function healBg(){if(bgLost()){buildBg();S.parts=S.parts.filter(p=>p.type!=='smoke')}}

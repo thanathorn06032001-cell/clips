@@ -19,6 +19,13 @@ app.get('/', (_req, res) => {
   res.sendFile(fs.existsSync(inPublic) ? inPublic : path.join(__dirname, 'index.html'));
 });
 app.get('/health', (_req, res) => res.json({ ok: true }));
+// ติดตั้งเป็นแอปบนหน้าจอหลัก (เปิดแบบเต็มจอ ไม่มีแถบเว็บ)
+app.get('/manifest.json', (_req, res) => res.json({
+  name: 'ศาลเจ้าแม่ประทานพร', short_name: 'ศาลเจ้าแม่', start_url: '/', scope: '/',
+  display: 'fullscreen', orientation: 'portrait', background_color: '#000000', theme_color: '#000000',
+  icons: [{ src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' }],
+}));
+app.get('/icon.svg', (_req, res) => res.type('image/svg+xml').send(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="96" fill="#5a0a14"/><circle cx="256" cy="230" r="150" fill="#ffd36b" opacity=".35"/><path d="M256 70 L290 210 L222 210Z" fill="#ffd36b"/><circle cx="256" cy="250" r="60" fill="#ffe2b8"/><path d="M150 450 Q256 300 362 450Z" fill="#c2183a"/><text x="256" y="490" font-size="56" text-anchor="middle" fill="#ffd36b" font-family="sans-serif">🙏</text></svg>`));
 const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
