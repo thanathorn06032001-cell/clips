@@ -44,7 +44,7 @@ body.live #gear{display:none}#hot{position:fixed;left:0;top:0;width:70px;height:
 </head>
 <body>
 <div id="stage">
- <div id="lnk" style="position:absolute;left:50%;top:6px;transform:translateX(-50%);z-index:4;display:none;padding:4px 14px;border-radius:14px;background:rgba(150,0,20,.88);border:1.5px solid #ffb0b0;font-size:15px;color:#fff;white-space:nowrap;max-width:560px;overflow:hidden;text-overflow:ellipsis"></div>
+ <div id="lnk" style="position:absolute;left:50%;bottom:78px;transform:translateX(-50%);z-index:4;display:none;padding:4px 14px;border-radius:14px;background:rgba(150,0,20,.88);border:1.5px solid #ffb0b0;font-size:15px;color:#fff;white-space:nowrap;max-width:560px;overflow:hidden;text-overflow:ellipsis"></div>
  <canvas id="cv" width="720" height="1280"></canvas>
  <div class="ov" id="title"><h1>รถแห่ม่วนซื่น</h1></div>
  <div class="ov" id="lv"><div class="fill" id="lvf"></div><div class="tx"><span>🔥 ความม่วน LV <b id="lvn">1</b></span><span id="lvt">0/300</span></div></div>
@@ -408,7 +408,7 @@ function mkImg(u){const im=new Image();im.src=viaServer?'/av?u='+encodeURICompon
 let ws=null,wsOk=false,wsFail=0;function lnk(t){const e=$('lnk');if(!e)return;e.textContent=t;e.style.display=t?'block':'none'}
 function wsConnect(){if(!viaServer){$('wst').textContent='โหมดทดสอบ (เปิดจากลิงก์ onrender เพื่อเชื่อม TikTok)';return}ws=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host);
  ws.onopen=()=>{wsOk=true;$('wst').textContent='✅ ต่อเซิร์ฟเวอร์แล้ว';clearInterval(window._pg);window._pg=setInterval(()=>{try{ws.readyState===1&&ws.send('{"type":"ping"}')}catch(e){}},240000);try{const u=(localStorage.getItem('pr_tt')||'').trim();if(u){ws.send(JSON.stringify({type:'connect',username:u}))}else lnk('🔴 ยังไม่ได้ใส่ชื่อ TikTok (กด ⚙️)')}catch(e){}};
- ws.onmessage=m=>{let d;try{d=JSON.parse(m.data)}catch(e){return}if(d.type==='status'){$('wst').textContent=d.text;lnk(/✅ เชื่อม @/.test(d.text)?'':'🔴 '+d.text.replace(/^[^\s]*\s/,''))}else handle(d)};
+ ws.onmessage=m=>{let d;try{d=JSON.parse(m.data)}catch(e){return}if(d.type==='status'){$('wst').textContent=d.text;if(/✅ เชื่อม @/.test(d.text)){lnk('🟢 '+d.text.replace(/^[^\s]*\s/,''));$('lnk').style.background='rgba(0,120,40,.9)';clearTimeout(window._lk);window._lk=setTimeout(()=>lnk(''),8000)}else{$('lnk').style.background='rgba(150,0,20,.88)';clearTimeout(window._lk);lnk('🔴 '+d.text.replace(/^[^\s]*\s/,''))}}else handle(d)};
  ws.onclose=()=>{if(viaServer)lnk('🔴 หลุดจากเซิร์ฟเวอร์ — กำลังต่อใหม่');if(!wsOk&&++wsFail>=2){$('wst').textContent='โหมดทดสอบ';return}setTimeout(wsConnect,4000)}}
 try{$('ttUser').value=localStorage.getItem('pr_tt')||''}catch(e){}
 $('bConn').onclick=()=>{const u=$('ttUser').value.trim().replace(/^@/,'');try{localStorage.setItem('pr_tt',u)}catch(e){}if(ws&&ws.readyState===1){ws.send(JSON.stringify({type:'connect',username:u,force:true}));$('wst').textContent='กำลังเชื่อม @'+u+'…'}else{wsFail=0;wsConnect()}};
