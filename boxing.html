@@ -301,10 +301,16 @@ const VO={keys:["cd10", "cd30", "fight1", "fight2", "fight3", "giant", "heart", 
 function voLoad(){const c=au();if(!c||VO.loading)return;VO.loading=true;let n=0;VO.out=c.createGain();VO.out.gain.value=1.15;VO.out.connect(c.destination);
  VO.keys.forEach(k=>fetch('assets/vo/'+k+'.mp3').then(r=>r.arrayBuffer()).then(b=>c.decodeAudioData(b)).then(d=>{VO.buf[k]=d;if(++n>=8)VO.ready=true}).catch(()=>{}))}
 function voPick(p){const L=VO.keys.filter(k=>k===p||(k.startsWith(p)&&/^\d+$/.test(k.slice(p.length)))).filter(k=>VO.buf[k]);if(!L.length)return null;const fresh=L.filter(k=>k!==VO.last[p]);const k=pick(fresh.length?fresh:L);VO.last[p]=k;return k}
-function voPlay(){if(VO.src||!VO.q.length){if(!VO.src&&!V.busy)muDuck(false);return}const it=VO.q.shift();const b=VO.buf[it.k];if(!b)return voPlay();const c=AC,n=c.createBufferSource();n.buffer=b;n.connect(VO.out);VO.src=n;VO.cur=it.prio;muDuck(true);n.onended=()=>{VO.src=null;VO.cur=-1;setTimeout(voPlay,120)};n.start()}
+function voPlay(){if(VO.src||!VO.q.length){if(!VO.src&&!V.busy)muDuck(false);return}const it=VO.q.shift();const b=it.b||VO.buf[it.k];if(!b)return voPlay();const c=AC,n=c.createBufferSource();n.buffer=b;n.connect(VO.out);VO.src=n;VO.cur=it.prio;muDuck(true);n.onended=()=>{VO.src=null;VO.cur=-1;setTimeout(voPlay,120)};n.start()}
 function vo(p,prio=1){if(!V.on)return false;if(!(VO.on&&VO.ready))return false;const k=voPick(p);if(!k)return false;
  if(VO.src&&prio>=3&&VO.cur<3){try{VO.src.onended=null;VO.src.stop()}catch(e){}VO.src=null;VO.q=[]}
  if(VO.src&&prio<=0)return true;VO.q.push({k,prio});VO.q.sort((a,b)=>b.prio-a.prio);if(VO.q.length>2)VO.q.length=2;voPlay();return true}
+// เรียกชื่อผ่านเซิร์ฟเวอร์ (/tts) ถ้าไม่ได้ ใช้คลิปสำรอง
+const nameOK=n=>{const c=clean(n);return c&&c!=='นักมวย'?c.slice(0,18):''};
+function voName(text,prio,fbKey,fbText){if(!V.on)return;if(!viaServer||!VO.on){sayK(fbKey,fbText||text,prio);return}const c=au();if(!c){sayK(fbKey,fbText||text,prio);return}
+ let done=false;const fb=()=>{if(done)return;done=true;sayK(fbKey,fbText||text,prio)};const to=setTimeout(fb,6000);
+ fetch('/tts?t='+encodeURIComponent(text)).then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).then(b=>c.decodeAudioData(b)).then(d=>{if(done)return;done=true;clearTimeout(to);
+  if(VO.src&&prio>=3&&VO.cur<3){try{VO.src.onended=null;VO.src.stop()}catch(e){}VO.src=null;VO.q=[]}VO.q.push({k:'name',b:d,prio});VO.q.sort((a,b)=>b.prio-a.prio);if(VO.q.length>2)VO.q.length=2;voPlay()}).catch(()=>{clearTimeout(to);fb()})}
 function sayK(p,text,prio,tr=0){if(V.on&&VO.on&&!VO.ready&&tr<8){voLoad();setTimeout(()=>sayK(p,text,prio,tr+1),500);return}if(!vo(p,prio))say(text,prio)}
 function pickVoice(){if(!('speechSynthesis' in window))return;const vs=speechSynthesis.getVoices();V.voice=vs.find(v=>/^th/i.test(v.lang)&&/google/i.test(v.name))||vs.find(v=>/^th/i.test(v.lang))||null}
 if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
@@ -315,8 +321,8 @@ function next(){if(V.busy||!V.q.length){if(!V.busy)muDuck(false);return}const it
 const KO_SAFE=['{a} น็อก {b}!','{a} จัดการ {b} เรียบร้อย!','{b} ร่วงแล้ว ฝีมือ {a}!','{a} ส่ง {b} กลับบ้าน!','{a} ปิดฉาก {b}!','หมัดเด็ด! {a} ล้ม {b}!'];
 const KO_HARD=['{a} สังหาร {b}!','{a} สังหาร {b} อย่างโหด!','{b} ถูก {a} สังหารแล้ว!'];
 function koVoice(a,b){a.streak=(a.streak||0)+1;const A=clean(a.nick),B=clean(b.nick);
- if(a.streak>=3&&a.streak%3===0){sayK('streak',`${A} ไร้เทียมทาน! ล้มไปแล้ว ${a.streak} คนติด!`,2);return}
- const L=V.hard?KO_HARD.concat(KO_SAFE.slice(0,2)):KO_SAFE;const kt=pick(L).replace('{a}',A).replace('{b}',B);sayK('ko',kt,1)}
+ if(a.streak>=3&&a.streak%3===0){const An=nameOK(a.nick);if(An)voName(`${An} ไร้เทียมทาน! ล้มไปแล้ว ${a.streak} คนติด!`,2,'streak');else sayK('streak',`${A} ไร้เทียมทาน!`,2);return}
+ const L=V.hard?KO_HARD.concat(KO_SAFE.slice(0,2)):KO_SAFE;const kt=pick(L).replace('{a}',A).replace('{b}',B);const An=nameOK(a.nick),Bn=nameOK(b.nick);if(An&&Bn&&cool('kon',2.5))voName(pick([`${An} น็อก ${Bn}! ร่วงไปแล้ว!`,`${Bn} โดน ${An} ซัดร่วง!`,`${An} ส่ง ${Bn} ลงไปนอนกับพื้น!`,`หมัดเด็ดของ ${An}! ${Bn} ลุกไม่ขึ้น!`,`${Bn} ล้มแล้ว! ฝีมือ ${An}!`]),1,'ko',kt);else sayK('ko',kt,1)}
 /* ---------- Muay Thai music (pi java + klong khaek + ching) ---------- */
 const MU={mode:'song',fast:1.5,on:true,vol:.6,node:null,step:0,bar:0,next:0,timer:null,pi:null,last:-1};try{MU.mode=localStorage.getItem('box_mode')||'song';MU.fast=parseFloat(localStorage.getItem('box_fast'))||1.5}catch(e){}
 try{MU.on=localStorage.getItem('box_mu')!=='0';const v=parseFloat(localStorage.getItem('box_mv'));if(v>=0)MU.vol=v}catch(e){}
@@ -328,7 +334,7 @@ function muInit(){const c=au();if(!c||MU.node)return;MU.node=c.createGain();MU.d
  bp.type='peaking';bp.frequency.value=1400;bp.Q.value=1.6;bp.gain.value=9;lp.type='lowpass';lp.frequency.value=3200;const m2=c.createGain();m2.gain.value=.35;
  o1.connect(bp);o2.connect(m2);m2.connect(bp);bp.connect(lp);lp.connect(g);g.connect(MU.node);g.gain.value=0;[o1,o2,lfo].forEach(o=>o.start());MU.pi={o1,o2,g};
  MU.next=c.currentTime+.1;MU.timer=setInterval(muSched,25);
- try{const a=new Audio('assets/boxsong1.mp3');a.loop=true;a.preload='auto';MU.au=a;const src=c.createMediaElementSource(a);MU.sg=c.createGain();MU.sd=c.createGain();src.connect(MU.sg);MU.sg.connect(MU.sd);MU.sd.connect(c.destination);a.onerror=()=>{MU.mode='synth';muMode()}}catch(e){MU.mode='synth'}
+ try{const a=new Audio('assets/boxsong1.mp3');a.loop=true;a.preload='auto';MU.au=a;a.addEventListener('ended',()=>{try{a.currentTime=0;a.play()}catch(e){}});a.addEventListener('pause',()=>{if(MU.mode==='song'&&!document.hidden)setTimeout(()=>{if(MU.mode==='song'&&a.paused)a.play().catch(()=>{})},400)});const src=c.createMediaElementSource(a);MU.sg=c.createGain();MU.sd=c.createGain();src.connect(MU.sg);MU.sg.connect(MU.sd);MU.sd.connect(c.destination);a.onerror=()=>{MU.mode='synth';muMode()}}catch(e){MU.mode='synth'}
  muMode()}
 function muMode(){if(!AC)return;const song=MU.mode==='song'&&MU.au;if(song){if(MU.pi)MU.pi.g.gain.setTargetAtTime(0,AC.currentTime,.05);MU.au.play().catch(()=>{})}else if(MU.au)MU.au.pause();MU.next=AC.currentTime+.1;muVol();if(window.muLabel)muLabel()}
 function muVol(){if(MU.node)MU.node.gain.setTargetAtTime(MU.on?MU.vol*.55:0,AC.currentTime,.15);if(MU.sg)MU.sg.gain.setTargetAtTime(MU.on?MU.vol*.9:0,AC.currentTime,.15)}
@@ -366,7 +372,7 @@ function phaseTick(dt){const alive=S.f.filter(f=>!f.ko);
 function startFight(){if(S.phase!=='lobby')return;if(S.f.filter(f=>!f.ko).length<2){banner('ยังเริ่มไม่ได้','ต้องมีนักมวยบนเวทีอย่างน้อย 2 คน',2500);return}
  S.phase='fight';S.timer=CFG.fight;for(const f of S.f)if(f.crown>0)f.crown=15;bell();S.l2=0;S.hypeT=S.t+7;if(vo('fight',3))vo('heart',2);else say(`ยกที่ ${S.round}! ชก! เคาะใจรัวๆ ฟื้นเลือดให้นักมวยของคุณ!`,3);banner(`🔔 ยกที่ ${S.round}`,'ชก! ❤️ เคาะใจ = ฟื้นเลือด',2200)}
 function endRound(w,byTime){if(S.phase!=='fight')return;S.phase='end';
- if(w){w.isChamp=1;S.champ=w.id;banner(byTime?'⏰ หมดเวลา!':'🏆 แชมป์ยกที่ '+S.round,w.nick+(byTime?' เลือดเหลือมากสุด ชนะ!':' ยืนหนึ่งบนสังเวียน!'),4500);sayK(byTime?'timeup':'win',byTime?`หมดเวลา! ผู้ชนะคือ ${clean(w.nick)}!`:`แชมป์ยกนี้คือ ${clean(w.nick)}! ยืนหนึ่งบนสังเวียน!`,3)}
+ if(w){w.isChamp=1;S.champ=w.id;banner(byTime?'⏰ หมดเวลา!':'🏆 แชมป์ยกที่ '+S.round,w.nick+(byTime?' เลือดเหลือมากสุด ชนะ!':' ยืนหนึ่งบนสังเวียน!'),4500);{const Wn=nameOK(w.nick);if(Wn)voName(byTime?`หมดเวลา! ผู้ชนะคือ ${Wn}!`:`แชมป์ยกนี้คือ ${Wn}! ยืนหนึ่งบนสังเวียน!`,3,byTime?'timeup':'win');else sayK(byTime?'timeup':'win','แชมป์ยกนี้มาแล้ว!',3)}}
  setTimeout(newLobby,5000)}
 function newLobby(){S.round++;const c=S.f.find(f=>f.id===S.champ&&!f.ko);S.f=[];if(c){Object.assign(c,{dmgB:0,hp:100,max:100,pow:0,powT:0,weap:null,giant:0,crown:0,shield:0,stun:0,streak:0,isChamp:1,enter:0});S.f.push(c)}
  S.phase='lobby';S.timer=CFG.lobby;S.lastSec=null;sayK('lobby',`เปิดรับนักมวยยกที่ ${S.round}! พิมพ์ ลง เพื่อขึ้นเวที!`,2)}

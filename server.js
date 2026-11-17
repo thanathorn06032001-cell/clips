@@ -20,6 +20,38 @@ app.get('/', (_req, res) => {
   res.sendFile(fs.existsSync(inPublic) ? inPublic : path.join(__dirname, 'index.html'));
 });
 app.get('/health', (_req, res) => res.json({ ok: true }));
+// ---------- เสียงพากย์เรียกชื่อ: ElevenLabs (ถ้าตั้ง XI_KEY ใน Render) ไม่งั้นใช้เสียงผู้ชาย Microsoft (Niwat) ----------
+const ttsCache = new Map();
+let xiCalls = [], xiDead = 0;
+async function ttsEleven(t) {
+  const key = process.env.XI_KEY; if (!key || Date.now() < xiDead) throw new Error('no xi');
+  const now = Date.now(); xiCalls = xiCalls.filter(x => now - x < 3600e3); if (xiCalls.length >= 80) throw new Error('xi hourly cap');
+  xiCalls.push(now);
+  const r = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${process.env.XI_VOICE || 'pNInz6obpgDQGcFmaJgB'}?output_format=mp3_44100_64`, {
+    method: 'POST', headers: { 'xi-api-key': key, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: '[excited] ' + t, model_id: process.env.XI_MODEL || 'eleven_v3', language_code: 'th', voice_settings: { stability: .35, similarity_boost: .8, style: .6 } }) });
+  if (!r.ok) { const m = await r.text(); console.log('[tts] eleven', r.status, m.slice(0, 160)); if (r.status === 401 || r.status === 402 || /quota|credit/i.test(m)) xiDead = Date.now() + 3600e3; throw new Error('xi ' + r.status); }
+  return Buffer.from(await r.arrayBuffer());
+}
+async function ttsEdge(t) {
+  const { MsEdgeTTS, OUTPUT_FORMAT } = await import('msedge-tts');
+  const tts = new MsEdgeTTS();
+  await tts.setMetadata(process.env.EDGE_VOICE || 'th-TH-NiwatNeural', OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+  const { audioStream } = tts.toStream(t, { rate: '+12%', pitch: '-2Hz' });
+  return await new Promise((ok, bad) => { const ch = []; const to = setTimeout(() => bad(new Error('edge timeout')), 9000);
+    audioStream.on('data', d => ch.push(d)); audioStream.on('close', () => { clearTimeout(to); const b = Buffer.concat(ch); b.length > 500 ? ok(b) : bad(new Error('edge empty')); }); audioStream.on('error', e => { clearTimeout(to); bad(e); }); });
+}
+app.get('/tts', async (req, res) => {
+  const t = String(req.query.t || '').replace(/[<>{}\[\]]/g, '').slice(0, 90).trim();
+  if (!t) return res.status(400).end();
+  let hit = ttsCache.get(t);
+  if (!hit) {
+    let buf = null, src = '';
+    try { buf = await ttsEleven(t); src = 'eleven'; } catch { try { buf = await ttsEdge(t); src = 'edge'; } catch (e) { console.log('[tts] fail', e.message); return res.status(502).end(); } }
+    hit = { buf, src }; ttsCache.set(t, hit); if (ttsCache.size > 400) ttsCache.delete(ttsCache.keys().next().value);
+  }
+  res.set('Content-Type', 'audio/mpeg').set('X-TTS', hit.src).set('Cache-Control', 'public, max-age=86400').send(hit.buf);
+});
 // เกมที่ 3: รถแห่ม่วนซื่น
 app.get('/parade', (_req, res) => {
   const inPublic = path.join(__dirname, 'public', 'parade.html');
