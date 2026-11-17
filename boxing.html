@@ -10,13 +10,14 @@
 #box{position:fixed;inset:0}#stage{position:absolute;width:720px;height:1280px;transform-origin:0 0;overflow:hidden}
 #cv{position:absolute;inset:0}
 .ov{position:absolute;pointer-events:none}
-#title{left:0;right:0;top:14px;text-align:center}
-#title h1{margin:0;font-size:52px;line-height:1;font-weight:600;background:linear-gradient(#fff6b0,#ffb020 55%,#ff5a1a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 3px 0 #5a0a00) drop-shadow(0 0 14px rgba(255,120,0,.6))}
-#title p{margin:6px auto 0;display:inline-block;font-size:18px;padding:3px 14px;border-radius:16px;background:rgba(0,0,0,.55);border:1px solid #ff9b2f}
+#title{left:0;right:0;top:4px;text-align:center}
+#title h1{margin:0;font-size:40px;line-height:1;font-weight:600;background:linear-gradient(#fff6b0,#ffb020 55%,#ff5a1a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 3px 0 #5a0a00) drop-shadow(0 0 14px rgba(255,120,0,.6))}
+#title p{position:absolute;left:0;right:0;top:142px;margin:0 auto;width:max-content;max-width:704px;font-size:16.5px;padding:3px 14px;border-radius:16px;background:rgba(0,0,0,.55);border:1px solid #ff9b2f}
 .box{background:linear-gradient(180deg,rgba(20,10,40,.85),rgba(8,4,20,.88));border:2px solid #ff9b2f;border-radius:14px;padding:9px 11px;box-shadow:0 0 16px rgba(255,120,0,.25)}
 .box h3{margin:0 0 5px;font-size:18px;color:#ffd36b;font-weight:500}
-#roster{left:10px;top:108px;width:272px;height:478px;font-size:13px;padding:8px 8px}
-#roster .hd,#roster .rw{display:grid;grid-template-columns:1fr 62px 40px 30px;gap:2px;align-items:center}
+#roster{left:8px;top:178px;width:330px;height:236px;font-size:12.5px;padding:6px 8px;background:linear-gradient(180deg,rgba(20,10,40,.62),rgba(8,4,20,.62))}
+#roster h3{font-size:15px;margin:0 0 3px}
+#roster .hd,#roster .rw{display:grid;grid-template-columns:1fr 72px 54px 26px;gap:2px;align-items:center}
 #roster .hd{color:#ffcf7a;font-size:12px;border-bottom:1px solid rgba(255,155,47,.4);padding-bottom:3px;margin-bottom:2px}
 #roster .rw{padding:1px 4px;border-radius:5px;margin:1px 0;transition:background-color .3s}
 #roster .rw span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -24,9 +25,9 @@
 #roster .dead{opacity:.4;text-decoration:line-through}
 #roster .up{box-shadow:inset 0 0 0 2px #4cff6a}#roster .pw{box-shadow:inset 0 0 0 2px #ff9b2f}#roster .dn .h{color:#ff6a6a}
 #roster .pg{float:right;font-size:12px;color:#ccc}
-#cmd{right:12px;top:112px;width:236px;font-size:14px;line-height:1.5}
+#cmd{display:none;right:12px;top:112px;width:236px;font-size:14px;line-height:1.5}
 #cmd b{color:#ffd36b}
-#gift{right:12px;top:262px;width:236px;font-size:12.5px}
+#gift{display:none;right:12px;top:262px;width:236px;font-size:12.5px}
 #gift .m{display:flex;gap:6px;align-items:center;margin:2px 0;background:rgba(255,255,255,.06);border-radius:7px;padding:1px 6px;line-height:1.25;white-space:nowrap;overflow:hidden}
 #gift .m i{font-style:normal;font-size:19px;width:24px;text-align:center}#gift small{color:#ffcf7a;font-size:11.5px;margin-left:4px}
 #feed{left:14px;right:14px;top:1106px;height:58px;font-size:15px;line-height:1.5;padding:4px 12px;background:rgba(0,0,0,.55);border-radius:12px;border:1px solid rgba(255,155,47,.5)}
@@ -46,10 +47,20 @@
 body.live #gear{display:none}
 #sim{bottom:auto!important;top:50px}
 #hot{position:fixed;left:0;top:0;width:70px;height:70px;z-index:8}
-#cd{left:150px;right:150px;top:610px;text-align:center}
+#cd{left:auto;right:8px;width:330px;top:178px;text-align:center}
 #cd .box{padding:10px 8px;border-width:3px}
-#cd .t1{font-size:20px;color:#ffcf7a}#cd .t2{font-size:64px;font-weight:600;line-height:1.05;color:#fff;text-shadow:0 0 18px #ff9b2f}#cd .t3{font-size:16px}
+#cd .t1{font-size:18px;color:#ffcf7a}#cd .t2{font-size:50px;font-weight:600;line-height:1.05;color:#fff;text-shadow:0 0 18px #ff9b2f}#cd .t3{font-size:16px}
 #sim button{font:inherit;font-size:13px;padding:5px 8px;border-radius:8px;border:1px solid #ff9b2f;background:#2a1430;color:#fff}
+#gstrip{left:0;right:0;top:52px;height:86px;overflow:hidden}
+#gstrip .rail{display:flex;gap:7px;position:absolute;left:0;top:0;animation:gslide 30s linear infinite}
+@keyframes gslide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+#gstrip .card{width:100px;height:84px;flex:none;border-radius:13px;background:linear-gradient(165deg,rgba(255,150,40,.5),rgba(60,16,90,.9) 60%);border:1.5px solid rgba(255,210,120,.6);text-align:center;padding-top:3px}
+#gstrip .card .ic{height:36px;display:flex;align-items:center;justify-content:center;font-size:30px;line-height:1}#gstrip .card img{width:36px;height:36px;object-fit:contain}
+#gstrip .card b{display:block;font-size:12px;font-weight:500;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 3px}
+#gstrip .card small{display:inline-block;margin-top:1px;padding:0 7px;border-radius:8px;background:linear-gradient(#ffe36b,#ffb020);color:#4a1a00;font-size:11px;font-weight:600}
+#htip{left:0;right:0;top:930px;text-align:center;display:none}
+#htip span{display:inline-block;padding:8px 22px;border-radius:24px;font-size:26px;font-weight:600;background:linear-gradient(90deg,rgba(255,60,120,.92),rgba(200,30,90,.92));border:2.5px solid #fff;box-shadow:0 0 22px rgba(255,80,140,.8);animation:hb .55s ease-in-out infinite alternate}
+@keyframes hb{from{transform:scale(1)}to{transform:scale(1.08)}}
 </style>
 </head>
 <body>
@@ -57,8 +68,10 @@ body.live #gear{display:none}
  <div id="lnk" style="position:absolute;left:50%;bottom:78px;transform:translateX(-50%);z-index:4;display:none;padding:4px 14px;border-radius:14px;background:rgba(150,0,20,.88);border:1.5px solid #ffb0b0;font-size:15px;color:#fff;white-space:nowrap;max-width:560px;overflow:hidden;text-overflow:ellipsis"></div>
  <canvas id="c3" width="720" height="1280" style="position:absolute;left:0;top:0;width:720px;height:1280px"></canvas>
  <canvas id="cv" width="720" height="1280"></canvas>
- <div class="ov" id="title"><h1>มวยไลฟ์ สังเวียนเดือด</h1><p>พิมพ์ <b>"ลง"</b> ขึ้นเวที • <b>"hp"</b> +10 เลือด • <b>"ดาเมจ"</b> +1 แรงต่อย</p></div>
- <div class="ov box" id="roster"><h3>🥊 นักมวยบนเวที <span class="pg" id="pg"></span></h3><div class="hd"><span>ชื่อ</span><span style="text-align:right">❤️ HP</span><span style="text-align:right">⚔️ ดาเมจ</span><span style="text-align:right">KO</span></div><div id="rl"></div></div>
+ <div class="ov" id="title"><h1>มวยไลฟ์ สังเวียนเดือด</h1><p>พิมพ์ <b>"ลง"</b> ขึ้นเวที • <b>"hp"</b> +10 • <b>"ดาเมจ"</b> +1 • ❤️ เคาะใจ +0.5 HP ตอนชก</p></div>
+ <div class="ov" id="gstrip"><div class="rail" id="grail"></div></div>
+ <div class="ov" id="htip"><span>❤️ เคาะใจรัวๆ = ฟื้นฟู HP!</span></div>
+ <div class="ov box" id="roster"><h3>🥊 นักมวยบนเวที <span class="pg" id="pg"></span></h3><div class="hd"><span>ชื่อ</span><span style="text-align:right">❤️ HP</span><span style="text-align:right;white-space:nowrap">⚔️ดาเมจ</span><span style="text-align:right">KO</span></div><div id="rl"></div></div>
  <div class="ov" id="feed"><div id="fl"></div></div>
  <div id="start" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:5"><button id="bStart" style="font:inherit;font-size:34px;padding:20px 38px;border-radius:20px;border:3px solid #ff9b2f;background:linear-gradient(#e8203a,#7a0c14);color:#fff">🥊 แตะเพื่อเริ่ม</button></div>
  <div class="ov box" id="cmd"><h3>⌨️ พิมพ์เพื่อเล่น</h3><b>ลง</b> = ขึ้นเวที (ไม่จำกัดคน)<br><b>hp</b> = +10 HP (ไม่จำกัด)<br><b>ดาเมจ</b> = +1 ดาเมจ (ไม่จำกัด)<br>❤️ เคาะใจ = +0.5 HP ตอนชก<br><span style="color:#ff9b2f">⚠️ บัฟ/ของขวัญ ได้เฉพาะช่วงเตรียมตัว</span></div>
@@ -135,6 +148,10 @@ const GIFTS=[
  {re:/tiktok|ติ๊กต๊อก/i,short:'TikTok',s2:'+5 ดาเมจ',icon:'🎵',n:'TikTok',fx:'ดาเมจ +5',run:f=>addDmg(f,5)},
  {re:/rose|rosa|กุหลาบ|โรซ่า/i,short:'กุหลาบ',s2:'+30 HP',icon:'🌹',n:'กุหลาบ',fx:'HP +30',run:f=>addMax(f,30)},
 ];
+let GIMG={};try{GIMG=JSON.parse(localStorage.getItem('box_gimg')||'{}')}catch(e){}
+const gimgSrc=u=>viaServer?'/av?u='+encodeURIComponent(u):u;
+function renderGStrip(){const cards=GIFTS.slice().reverse().map(g=>`<div class="card"><div class="ic">${GIMG[g.short]?`<img src="${esc(gimgSrc(GIMG[g.short]))}" alt="">`:g.icon}</div><b>${g.short}</b><small>${g.s2.replace(/^[^+ก-๙A-Za-z0-9]+\s*/,'')}</small></div>`).join('');$('grail').innerHTML=cards+cards}
+setTimeout(renderGStrip,0);
 $('gl').innerHTML=GIFTS.slice().reverse().map(g=>`<div class="m"><i>${g.icon}</i><span>${g.short}</span><small>${g.s2}</small></div>`).join('');
 function addMax(f,n){f.max+=n;f.hp=Math.min(f.max,f.hp+n)}
 function addDmg(f,n){f.dmgB=(f.dmgB||0)+n}
@@ -151,11 +168,11 @@ function handle(e){if(e&&e._sim!==1)dbg(e);const id=e.user||e.nick,nick=String(e
   if(/^\s*(ดาเมจ|ดาเมท|damage|dmg|ตี)/i.test(t)&&cool(id+'p',1)){addDmg(f,1);txt(x+rnd(-10,10),y-130*scl(f.v),'+1 ดาเมจ','#ff9b2f')}
 }
  if(e.type==='like'){const f=S.f.find(x=>x.id===id&&!x.ko);if(!f)return;if(S.phase!=='fight'){return}
-  const before=f.hp,add=(e.count||1)*0.5;f.hp=Math.min(f.max,f.hp+add);const got=Math.round((f.hp-before)*10)/10;const [x,y]=toXY(f.u,f.v);
-  if(got>0){txt(x+rnd(-12,12),y-118*scl(f.v),'❤️+'+got,'#ff7aa8',22);if(cool(id+'lf',6))feed(`❤️ ${nick} เคาะใจ ฟื้นเลือด +${got} (${Math.round(f.hp)}/${f.max})`)}else if(cool(id+'lm',6))txt(x,y-118*scl(f.v),'❤️ เลือดเต็มแล้ว','#ffb0c8',16)}
+  f.likeQ=(f.likeQ||0)+(e.count||1);const [x,y]=toXY(f.u,f.v);if(f.hp<f.max){if(cool(id+'lf',6))feed(`❤️ ${nick} เคาะใจ ฟื้นฟู HP (+0.5 ต่อใจ)`)}else if(cool(id+'lm',6))txt(x,y-118*scl(f.v),'❤️ HP เต็มแล้ว','#ffb0c8',16)}
  if(e.type==='gift'){if(S.phase!=='lobby'){const on=S.f.find(x=>x.id===id&&!x.ko);if(!on)fighter(id,nick,e.avatar);if(on){const [x,y]=toXY(on.u,on.v);txt(x,y-140*scl(on.v),'🔒 ช่วงชก บัฟไม่ได้','#aaa',18)}feed(`🎁 ${nick} ส่ง ${e.giftName||'ของขวัญ'} (ช่วงชก ยังไม่มีผล)`);return}
   const f=fighter(id,nick,e.avatar)||S.f.find(x=>x.id===id);if(!f)return;const g=GIFTS.find(x=>x.re.test(e.giftName||''));const n=Math.min(10,Math.max(1,e.count||1));for(let k=0;k<n;k++){if(g)g.run(f);else giftFallback(f,e.diamonds||1)}const hpTxt=` (HP ${Math.round(f.hp)}/${f.max} • ดาเมจ ${atk(f)})`;
-  const [x,y]=toXY(f.u,f.v);burst(x,y-80,30,['#ffd36b','#fff','#ff9b2f']);txt(x,y-150*scl(f.v),(g?g.icon+' '+g.n:'🎁')+(n>1?' x'+n:'')+'!','#ffd36b',28);say(`${clean(nick)} ได้${g?g.s2.replace(/^[^ก-๙A-Za-z]+/,''):'พลังพิเศษ'}!`,2);feed(`🎁 ${nick}: ${g?g.fx:'HP +'+30*n}${n>1&&g?' x'+n:''}${hpTxt}`)}}
+  const [x,y]=toXY(f.u,f.v);burst(x,y-80,30,['#ffd36b','#fff','#ff9b2f']);
+  if(e.giftImg){if(g&&GIMG[g.short]!==e.giftImg){GIMG[g.short]=e.giftImg;try{localStorage.setItem('box_gimg',JSON.stringify(GIMG))}catch(_){}renderGStrip()}const im=mkImg(e.giftImg);S.parts.push({type:'i',img:im,x,y:y-175*scl(f.v),vy:-40,life:1.8,max:1.8})}txt(x,y-150*scl(f.v),(g?g.icon+' '+g.n:'🎁')+(n>1?' x'+n:'')+'!','#ffd36b',28);say(`${clean(nick)} ได้${g?g.s2.replace(/^[^ก-๙A-Za-z]+/,''):'พลังพิเศษ'}!`,2);feed(`🎁 ${nick}: ${g?g.fx:'HP +'+30*n}${n>1&&g?' x'+n:''}${hpTxt}`)}}
 /* ---------- fighter drawing ---------- */
 function avDraw(f,x,y,r){ctx.save();ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.clip();let h=0;for(const c of f.nick)h=(h*31+c.charCodeAt(0))>>>0;ctx.fillStyle=`hsl(${h%360},60%,55%)`;ctx.fillRect(x-r,y-r,2*r,2*r);
  if(f.img&&f.img.complete&&f.img.naturalWidth)ctx.drawImage(f.img,x-r,y-r,2*r,2*r);else{ctx.fillStyle='#fff';ctx.font='600 15px Mitr, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText([...f.nick][0]||'?',x,y+1)}ctx.restore();
@@ -203,7 +220,8 @@ function hudF(f){const [x,y]=toXY(f.u,f.v),s=scl(f.v)*(f.giant?1.6:1);
  if(f.weap||f.pow>0){ctx.font='13px sans-serif';ctx.fillText((f.weap?{gold:'🥊',knuckle:'👊',pan:'🍳',hammer:'🔨',fish:'🐟'}[f.weap]:'')+(f.pow>0?'🔥':''),x+bw/2+10,by+2)}}
 /* ---------- simulation ---------- */
 function step(dt){const live=S.f.filter(f=>!f.ko);
- for(const f of S.f){if(f.ko){if(S.t-f.koT>3)f.gone=1;continue}
+ for(const f of S.f){if(f.ko){f.likeQ=0;if(S.t-f.koT>3)f.gone=1;continue}
+  if(f.likeQ>0){f.lt=(f.lt||0)+dt;const step=Math.max(.02,Math.min(.09,1.2/f.likeQ));while(f.lt>=step&&f.likeQ>0){f.lt-=step;f.likeQ--;if(S.phase==='fight'&&f.hp<f.max){f.hp=Math.min(f.max,f.hp+.5);if(Math.random()<.5){const [hx,hy]=toXY(f.u,f.v);S.parts.push({type:'t',x:hx+rnd(-16,16),y:hy-112*scl(f.v),vy:-70,life:.7,max:.7,t:'❤️+0.5',c:'#ff8ab4',sz:17})}}}if(f.likeQ<=0)f.lt=0}
   f.hit=Math.max(0,f.hit-dt*2);if(f.punch>0){f.punch+=dt*4;if(f.punch>=1)f.punch=0}if(f.powT>0){f.powT-=dt;if(f.powT<=0)f.pow=0}if(S.phase==='fight'){if(f.shield>0)f.shield-=dt;if(f.crown>0)f.crown-=dt}if(f.stun>0){f.stun-=dt;continue}
   if(f.enter){const du=f.tu-f.u;f.dir=du>=0?1:-1;f.u+=Math.sign(du)*Math.min(Math.abs(du),.25*dt);if(Math.abs(du)<.01)f.enter=0;continue}
   if(S.phase!=='fight')continue;
@@ -221,7 +239,7 @@ function step(dt){const live=S.f.filter(f=>!f.ko);
  while(S.phase==='lobby'&&S.q.length&&S.f.filter(f=>!f.ko).length<MAXON){const q=S.q.shift();fighter(q.id,q.nick,q.av)}
  phaseTick(dt);
  if(S.whale){S.whale.x+=520*dt;if(!S.whale.hit&&S.whale.x>360){S.whale.hit=1;for(const o of S.f)if(!o.ko&&o.id!==S.whale.id){o.hp-=o.max*.5;o.hit=.5;if(o.hp<=0){o.ko=1;o.koT=S.t;S.ko[S.whale.by]=(S.ko[S.whale.by]||0)+1}}burst(360,820,80,['#bff3ff','#fff','#6ad0ff'],520)}if(S.whale.x>W+400)S.whale=null}
- for(let i=S.parts.length-1;i>=0;i--){const p=S.parts[i];p.life-=dt;if(p.life<=0){S.parts.splice(i,1);continue}if(p.type==='t'){p.y+=p.vy*dt}else{p.vy+=p.g*dt;p.x+=p.vx*dt;p.y+=p.vy*dt}}}
+ for(let i=S.parts.length-1;i>=0;i--){const p=S.parts[i];p.life-=dt;if(p.life<=0){S.parts.splice(i,1);continue}if(p.type==='t'||p.type==='i'){p.y+=p.vy*dt}else{p.vy+=p.g*dt;p.x+=p.vx*dt;p.y+=p.vy*dt}}}
 function drawWhale(){const w=S.whale;if(!w)return;const y=760-Math.max(0,1-Math.abs(w.x-360)/400)*120;ctx.save();ctx.translate(w.x,y);ctx.rotate(.15);const g=ctx.createLinearGradient(0,-80,0,80);g.addColorStop(0,'#9fd8ff');g.addColorStop(1,'#2a6ab0');ctx.fillStyle=g;
  ctx.beginPath();ctx.ellipse(0,0,230,90,0,0,7);ctx.fill();ctx.beginPath();ctx.moveTo(-210,0);ctx.lineTo(-330,-70);ctx.lineTo(-300,0);ctx.lineTo(-330,70);ctx.fill();ctx.fillStyle='#e6f6ff';ctx.beginPath();ctx.ellipse(30,40,160,36,0,0,Math.PI);ctx.fill();
  ctx.fillStyle='#111';ctx.beginPath();ctx.arc(150,-20,10,0,7);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(153,-24,3,0,7);ctx.fill();ctx.restore()}
@@ -240,7 +258,7 @@ function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;S.t+=dt;step
  drawRing(false)}
  S.f.slice().sort((a,b)=>a.v-b.v).forEach(drawF);
  if(!window.G3)drawRing(true);drawWhale();
- for(const p of S.parts){const a=clamp(p.life/p.max,0,1);if(p.type==='t'){ctx.globalAlpha=Math.min(1,a*2);ctx.font=`600 ${p.sz}px Mitr, sans-serif`;ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='rgba(0,0,0,.85)';ctx.strokeText(p.t,p.x,p.y);ctx.fillStyle=p.c;ctx.fillText(p.t,p.x,p.y);ctx.globalAlpha=1}else{ctx.globalAlpha=a;ctx.fillStyle=p.c;ctx.beginPath();ctx.arc(p.x,p.y,p.sz,0,7);ctx.fill();ctx.globalAlpha=1}}
+ for(const p of S.parts){const a=clamp(p.life/p.max,0,1);if(p.type==='i'){if(p.img.complete&&p.img.naturalWidth){ctx.globalAlpha=Math.min(1,a*2);const z=70*(1+.35*Math.max(0,1-(p.max-p.life)*4));ctx.drawImage(p.img,p.x-z/2,p.y-z/2,z,z);ctx.globalAlpha=1}continue}if(p.type==='t'){ctx.globalAlpha=Math.min(1,a*2);ctx.font=`600 ${p.sz}px Mitr, sans-serif`;ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='rgba(0,0,0,.85)';ctx.strokeText(p.t,p.x,p.y);ctx.fillStyle=p.c;ctx.fillText(p.t,p.x,p.y);ctx.globalAlpha=1}else{ctx.globalAlpha=a;ctx.fillStyle=p.c;ctx.beginPath();ctx.arc(p.x,p.y,p.sz,0,7);ctx.fill();ctx.globalAlpha=1}}
  $('on').textContent=S.f.filter(f=>!f.ko).length;$('q').textContent=S.q.length;$('rd').textContent=S.round;
 
  requestAnimationFrame(frame)}
@@ -257,7 +275,7 @@ const atk=f=>Math.round((8.5+(f.dmgB||0))*(1+f.pow)*(f.weap?WEAP[f.weap].mul:1)*
 const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const PREV={};let rpage=0,rlast=0;
 function renderRoster(){const now=S.t,list=S.f.slice().sort((a,b)=>(a.ko-b.ko)||((S.ko[b.nick]||0)-(S.ko[a.nick]||0))||(b.hp-a.hp));
- const per=16,pages=Math.max(1,Math.ceil(list.length/per));if(now-rlast>4){rlast=now;rpage=(rpage+1)%pages}if(rpage>=pages)rpage=0;
+ const per=8,pages=Math.max(1,Math.ceil(list.length/per));if(now-rlast>4){rlast=now;rpage=(rpage+1)%pages}if(rpage>=pages)rpage=0;
  $('pg').textContent=pages>1?`หน้า ${rpage+1}/${pages}`:'';
  let h='';for(const f of list.slice(rpage*per,rpage*per+per)){const hp=Math.max(0,Math.round(f.hp)),a=atk(f),pv=PREV[f.id]||{hp,a,up:0,pw:0,dn:0};
   if(hp>pv.hp)pv.up=now+.9;if(hp<pv.hp)pv.dn=now+.4;if(a>pv.a)pv.pw=now+1.2;pv.hp=hp;pv.a=a;PREV[f.id]=pv;
@@ -330,7 +348,7 @@ function endRound(w,byTime){if(S.phase!=='fight')return;S.phase='end';
  setTimeout(newLobby,5000)}
 function newLobby(){S.round++;const c=S.f.find(f=>f.id===S.champ&&!f.ko);S.f=[];if(c){Object.assign(c,{dmgB:0,hp:100,max:100,pow:0,powT:0,weap:null,giant:0,crown:0,shield:0,stun:0,streak:0,isChamp:1,enter:0});S.f.push(c)}
  S.phase='lobby';S.timer=CFG.lobby;S.lastSec=null;say(`เปิดรับนักมวยยกที่ ${S.round}! พิมพ์ ลง เพื่อขึ้นเวที!`,2)}
-function uiTick(){const cd=$('cd');if(S.phase==='lobby'){cd.style.display='block';if(CFG.auto){$('cd1').textContent=`ยกที่ ${S.round} เริ่มชกใน`;$('cd2').textContent=fmt(S.timer)}else{$('cd1').textContent=`ยกที่ ${S.round}`;$('cd2').textContent='รอเริ่ม'}
+function uiTick(){$('htip').style.display=(S.phase==='fight'&&S.timer>CFG.fight-8)?'block':'none';const cd=$('cd');if(S.phase==='lobby'){cd.style.display='block';if(CFG.auto){$('cd1').textContent=`ยกที่ ${S.round} เริ่มชกใน`;$('cd2').textContent=fmt(S.timer)}else{$('cd1').textContent=`ยกที่ ${S.round}`;$('cd2').textContent='รอเริ่ม'}
   $('cd3').textContent='พิมพ์ "ลง" ขึ้นเวที • "hp" / "ดาเมจ" / ของขวัญ บัฟได้ก่อนระฆังเท่านั้น!';$('ph').textContent='⏳ ช่วงลงเวที'}
  else if(S.phase==='fight'){cd.style.display='none';$('ph').textContent='⏱ '+fmt(S.timer)}else{cd.style.display='none';$('ph').textContent='🏁 จบยก'}}
 setInterval(uiTick,200);

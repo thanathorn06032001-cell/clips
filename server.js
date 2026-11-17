@@ -73,6 +73,25 @@ function status(text) { lastStatus = text; broadcast({ type: 'status', text }); 
 const GIFT_PRICE = { rose: 1, tiktok: 1, 'finger heart': 5, 'heart me': 1, perfume: 20, doughnut: 30, 'hand hearts': 100, corgi: 299, 'money gun': 500, galaxy: 1000, lion: 29999, universe: 34999 };
 const GIFT_ID = { 5655: ['Rose', 1], 5269: ['TikTok', 1], 5487: ['Finger Heart', 5], 6064: ['GG', 1], 5827: ['Ice Cream Cone', 1], 7934: ['Heart Me', 1], 5658: ['Perfume', 20], 5879: ['Doughnut', 30], 5660: ['Hand Hearts', 100], 7168: ['Money Gun', 500], 11046: ['Galaxy', 1000], 6820: ['Whale diving', 2150], 6369: ['Lion', 29999], 7312: ['TikTok Universe', 44999] };
 const giftSeen = new Map();
+const giftImgCache = {};
+function giftImage(d) {
+  const direct = picUrl(d.giftDetails?.giftImage) || picUrl(d.giftDetails?.image) || picUrl(d.giftDetails?.icon) || picUrl(d.extendedGiftInfo?.image) || picUrl(d.extendedGiftInfo?.icon);
+  if (direct) return (giftImgCache[d.giftId] = direct);
+  let found = '';
+  const seen = new Set();
+  (function walk(o, k0, depth) {
+    if (found || !o || typeof o !== 'object' || depth > 5 || seen.has(o)) return;
+    seen.add(o);
+    for (const [k, v] of Object.entries(o)) {
+      if (found) return;
+      if (k === 'user' || k === 'toUser' || /background|effect|banner|tray|frame|badge/i.test(k)) continue;
+      if (Array.isArray(v) && /urlList|url_list|urls/i.test(k) && /gift|image|icon/i.test(k0) && typeof v[0] === 'string' && /^https?:/.test(v[0])) { found = v[0]; return; }
+      if (typeof v === 'object') walk(v, k, depth + 1);
+    }
+  })(d, '', 0);
+  if (found) giftImgCache[d.giftId] = found;
+  return found || giftImgCache[d.giftId] || '';
+}
 function giftInfo(d) {
   const gd = d.giftDetails || d.extendedGiftInfo || d.gift || {};
   let name = gd.giftName || gd.name || d.giftName || '';
@@ -152,7 +171,7 @@ async function connectTo(username) {
     if (giftSeen.size > 500) for (const [k, v] of giftSeen) if (now - v.t > 60000) giftSeen.delete(k);
     console.log('[gift]', d?.user?.uniqueId, info.name, 'id', d.giftId, 'x', count);
     if (!info.known) { try { broadcast({ type: 'debug', text: 'gift id=' + d.giftId + ' ' + JSON.stringify(d, (k, v) => (k === 'user' || k === 'toUser' || /image|Image|url|Url|icon|Icon/.test(k)) ? undefined : v).slice(0, 400) }); } catch {} }
-    broadcast({ type: 'gift', ...who(d), giftName: info.name, giftId: d.giftId || 0, diamonds: info.diamonds, count });
+    broadcast({ type: 'gift', ...who(d), giftName: info.name, giftId: d.giftId || 0, diamonds: info.diamonds, count, giftImg: giftImage(d) });
   });
   c.on(ControlEvent.DISCONNECTED, () => {
     if (conn !== c) return;
