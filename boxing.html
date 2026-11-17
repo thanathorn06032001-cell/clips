@@ -61,7 +61,7 @@ body.live #gear{display:none}
  <div class="ov box" id="roster"><h3>🥊 นักมวยบนเวที <span class="pg" id="pg"></span></h3><div class="hd"><span>ชื่อ</span><span style="text-align:right">❤️ เลือด</span><span style="text-align:right">⚔️ ตี</span><span style="text-align:right">KO</span></div><div id="rl"></div></div>
  <div class="ov" id="feed"><div id="fl"></div></div>
  <div id="start" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:5"><button id="bStart" style="font:inherit;font-size:34px;padding:20px 38px;border-radius:20px;border:3px solid #ff9b2f;background:linear-gradient(#e8203a,#7a0c14);color:#fff">🥊 แตะเพื่อเริ่ม</button></div>
- <div class="ov box" id="cmd"><h3>⌨️ พิมพ์เพื่อเล่น</h3><b>ลง</b> = ขึ้นเวที (ไม่จำกัดคน)<br><b>เลือด</b> = +15 เลือด<br><b>ตี</b> = +ดาเมจ<br>❤️ กดหัวใจ = ฟื้นเลือด<br><span style="color:#ff9b2f">⚠️ บัฟ/ของขวัญ ได้เฉพาะช่วงเตรียมตัว</span></div>
+ <div class="ov box" id="cmd"><h3>⌨️ พิมพ์เพื่อเล่น</h3><b>ลง</b> = ขึ้นเวที (ไม่จำกัดคน)<br><b>เลือด</b> = +15 เลือด<br><b>ตี</b> = +ดาเมจ<br>❤️ เคาะใจ = ฟื้นเลือดตอนชก<br><span style="color:#ff9b2f">⚠️ บัฟ/ของขวัญ ได้เฉพาะช่วงเตรียมตัว</span></div>
  <div class="ov box" id="gift"><h3>🎁 ของขวัญ = ของเทพ</h3><div id="gl"></div></div>
  <div class="ov" id="banner"><div class="box"><h2 id="bnT"></h2><p id="bnP"></p></div></div>
  <div class="ov" id="cd"><div class="box"><div class="t1" id="cd1">เริ่มชกใน</div><div class="t2" id="cd2">1:00</div><div class="t3" id="cd3">พิมพ์ "ลง" เพื่อขึ้นเวที • เพิ่มเลือด/ดาเมจได้เลย</div></div></div>
@@ -125,17 +125,18 @@ let bannerT;function banner(t,p,ms=3500){$('bnT').textContent=t;$('bnP').textCon
 const GIFTS=[
  {re:/universe|จักรวาล/i,short:'Universe',s2:'แชมป์จักรวาล',icon:'🌌',n:'TikTok Universe',fx:'แชมป์จักรวาล: ยักษ์+นวมทอง+อมตะ 15 วิ',run:f=>{f.giant=1;f.weap='gold';f.crown=15;f.hp=f.max=300;banner('🌌 แชมป์จักรวาล!',f.nick+' กลายร่างเป็นยักษ์ทองคำ')}},
  {re:/whale|วาฬ/i,short:'ปลาวาฬ',s2:'ฟาดทั้งเวที',icon:'🐋',n:'ดำน้ำดูปลาวาฬ',fx:'วาฬยักษ์ฟาดเวที คนอื่นเลือดหาย 50%',run:f=>{S.whale={x:-300,by:f.nick,id:f.id};banner('🐋 วาฬถล่มเวที!','จาก '+f.nick);say(`ปลาวาฬของ ${clean(f.nick)} ถล่มเวทีแล้ว!`,3)}},
- {re:/galaxy|กาแล็กซี/i,short:'Galaxy',s2:'ร่างยักษ์',icon:'💥',n:'Galaxy',fx:'ร่างยักษ์ เลือด x3',run:f=>{f.giant=1;f.max=300;f.hp=300}},
+ {re:/galaxy|กาแล็กซี/i,short:'Galaxy',s2:'ร่างยักษ์',icon:'💥',n:'Galaxy',fx:'ร่างยักษ์ เลือด x3',run:f=>{f.giant=1;addMax(f,200)}},
  {re:/money ?gun|ปืน/i,short:'Money Gun',s2:'🍳 กระทะ',icon:'🍳',n:'Money Gun',fx:'กระทะทองเหลือง ต่อยแล้วมึน',run:f=>{f.weap='pan'}},
  {re:/hand ?hearts|มือ/i,short:'Hand Hearts',s2:'🥊 นวมทอง',icon:'🥊',n:'Hand Hearts',fx:'นวมทอง ดาเมจ x2',run:f=>{f.weap='gold'}},
- {re:/doughnut|donut|โดนัท/i,short:'โดนัท',s2:'เลือดเต็ม',icon:'🍩',n:'โดนัท',fx:'เลือดเต็มหลอด',run:f=>{f.hp=f.max}},
+ {re:/doughnut|donut|โดนัท/i,short:'โดนัท',s2:'+100 เลือด',icon:'🍩',n:'โดนัท',fx:'เลือดสูงสุด +100',run:f=>addMax(f,100)},
  {re:/hippo|ฮิปโป/i,short:'ฮิปโปน้อย',s2:'🐟 ปลาทู',icon:'🐟',n:'ฮิปโปน้อย',fx:'ปลาทูยักษ์ ตบกระเด็น',run:f=>{f.weap='fish'}},
  {re:/garland|มาลัย/i,short:'พวงมาลัย',s2:'🛡️ ประเจียด',icon:'🛡️',n:'พวงมาลัย',fx:'ประเจียดกันดาเมจทั้งยก',run:f=>{f.shield=9999}},
  {re:/finger ?heart|tiktok/i,short:'TikTok/หัวใจ',s2:'🔥 ดาเมจ+',icon:'🔥',n:'TikTok / ฟิงเกอร์ฮาร์ท',fx:'ดาเมจ +50% ทั้งยก',run:f=>{f.pow=Math.max(f.pow,.5);f.powT=9999}},
- {re:/^rose$|rosa|กุหลาบ|โรซ่า/i,short:'กุหลาบ',s2:'+25 เลือด',icon:'🌹',n:'กุหลาบ',fx:'+25 เลือด',run:f=>{f.hp=Math.min(f.max,f.hp+25)}},
+ {re:/rose|rosa|กุหลาบ|โรซ่า/i,short:'กุหลาบ',s2:'+25 เลือด',icon:'🌹',n:'กุหลาบ',fx:'เลือดสูงสุด +25',run:f=>addMax(f,25)},
 ];
 $('gl').innerHTML=GIFTS.slice().reverse().map(g=>`<div class="m"><i>${g.icon}</i><span>${g.short}</span><small>${g.s2}</small></div>`).join('');
-function giftFallback(f,d){if(d>=500){f.giant=1;f.max=300;f.hp=300}else if(d>=100)f.weap=pick(['knuckle','hammer','fish','pan']);else if(d>=10){f.pow=Math.max(f.pow,.5);f.powT=9999}else f.hp=Math.min(f.max,f.hp+15*d)}
+function addMax(f,n){f.max+=n;f.hp=Math.min(f.max,f.hp+n)}
+function giftFallback(f,d){if(d>=500){f.giant=1;addMax(f,200)}else if(d>=100)f.weap=pick(['knuckle','hammer','fish','pan']);else if(d>=10){f.pow=Math.max(f.pow,.5);f.powT=9999;addMax(f,25)}else addMax(f,25*d)}
 /* ---------- events (same format as shrine server) ---------- */
 const CD={};function cool(k,s){const n=Date.now();if(CD[k]&&n-CD[k]<s*1000)return false;CD[k]=n;return true}
 let dbgN=0,dbgL=[];function dbg(e){dbgN++;if(e.type==='like')return;dbgL.unshift((e.type==='chat'?'💬 ':e.type==='gift'?'🎁 ':'• ')+(e.nick||e.user||'?')+': '+(e.comment||e.giftName||e.type));dbgL.length=Math.min(dbgL.length,4);const d=document.getElementById('dbg');if(d)d.textContent='📨 ได้รับ '+dbgN+' รายการ\n'+dbgL.join('\n')}
@@ -144,12 +145,14 @@ function handle(e){if(e&&e._sim!==1)dbg(e);const id=e.user||e.nick,nick=String(e
   const tc=t.replace(/[\u200b-\u200f\ufeff\s.!~,]+/g,' ').trim();if(/^(ลง|ลงๆ+|ลงค่ะ|ลงครับ|ขึ้นเวที|เข้า|join|1)( |$)/i.test(tc)||/ลงเวที|ลงด้วย/.test(tc)){const f=fighter(id,nick,e.avatar);if(f)txt(...toXY(f.tu,f.v),'ขึ้นเวที!','#fff');return}
   const f=S.f.find(x=>x.id===id&&!x.ko);if(!f)return;const [x,y]=toXY(f.u,f.v);
   if(S.phase!=='lobby'){if(/เลือด|ฮีล|heal|\+|ตี|ดาเมจ|ต่อย|power|แรง/i.test(t)&&cool(id+'lk',8))txt(x,y-130*scl(f.v),'🔒 ชกอยู่ บัฟไม่ได้','#aaa',18);return}
-  if(/เลือด|ฮีล|heal|\+/i.test(t)&&cool(id+'h',5)){f.hp=Math.min(f.max,f.hp+15);txt(x,y-130*scl(f.v),'+15','#5dff7a')}
+  if(/เลือด|ฮีล|heal|\+/i.test(t)&&cool(id+'h',5)){if((f.chatHp||0)<60){f.chatHp=(f.chatHp||0)+15;addMax(f,15);txt(x,y-130*scl(f.v),'+15 เลือด','#5dff7a')}else txt(x,y-130*scl(f.v),'เลือดจากพิมพ์เต็มแล้ว ส่ง🌹เพิ่มได้','#ccc',16)}
   if(/ตี|ดาเมจ|ต่อย|power|แรง/i.test(t)&&cool(id+'p',5)){f.pow=Math.min(1,f.pow+.2);f.powT=9999;txt(x,y-130*scl(f.v),'ดาเมจ+','#ff9b2f')}}
- if(e.type==='like'){if(S.phase!=='lobby')return;const f=S.f.find(x=>x.id===id&&!x.ko);if(f)f.hp=Math.min(f.max,f.hp+Math.min(5,e.count||1))}
+ if(e.type==='like'){const f=S.f.find(x=>x.id===id&&!x.ko);if(!f)return;if(S.phase!=='fight'){return}
+  const before=f.hp,add=Math.min(15,Math.max(2,Math.round((e.count||1)*1.5)));f.hp=Math.min(f.max,f.hp+add);const got=Math.round(f.hp-before);const [x,y]=toXY(f.u,f.v);
+  if(got>0){txt(x+rnd(-12,12),y-118*scl(f.v),'❤️+'+got,'#ff7aa8',22);if(cool(id+'lf',6))feed(`❤️ ${nick} เคาะใจ ฟื้นเลือด +${got} (${Math.round(f.hp)}/${f.max})`)}else if(cool(id+'lm',6))txt(x,y-118*scl(f.v),'❤️ เลือดเต็มแล้ว','#ffb0c8',16)}
  if(e.type==='gift'){if(S.phase!=='lobby'){const on=S.f.find(x=>x.id===id&&!x.ko);if(!on)fighter(id,nick,e.avatar);if(on){const [x,y]=toXY(on.u,on.v);txt(x,y-140*scl(on.v),'🔒 ช่วงชก บัฟไม่ได้','#aaa',18)}feed(`🎁 ${nick} ส่ง ${e.giftName||'ของขวัญ'} (ช่วงชก ยังไม่มีผล)`);return}
-  const f=fighter(id,nick,e.avatar)||S.f.find(x=>x.id===id);if(!f)return;const g=GIFTS.find(x=>x.re.test(e.giftName||''));if(g)g.run(f);else giftFallback(f,e.diamonds||1);
-  const [x,y]=toXY(f.u,f.v);burst(x,y-80,30,['#ffd36b','#fff','#ff9b2f']);txt(x,y-150*scl(f.v),(g?g.icon+' '+g.n:'🎁')+'!','#ffd36b',28);say(`${clean(nick)} ได้${g?g.s2.replace(/^[^ก-๙A-Za-z]+/,''):'พลังพิเศษ'}!`,2);feed(`🎁 ${nick}: ${g?g.fx:'บัฟ!'}`)}}
+  const f=fighter(id,nick,e.avatar)||S.f.find(x=>x.id===id);if(!f)return;const g=GIFTS.find(x=>x.re.test(e.giftName||''));const n=Math.min(10,Math.max(1,e.count||1));for(let k=0;k<n;k++){if(g)g.run(f);else giftFallback(f,e.diamonds||1)}const hpTxt=` (เลือด ${Math.round(f.hp)}/${f.max})`;
+  const [x,y]=toXY(f.u,f.v);burst(x,y-80,30,['#ffd36b','#fff','#ff9b2f']);txt(x,y-150*scl(f.v),(g?g.icon+' '+g.n:'🎁')+(n>1?' x'+n:'')+'!','#ffd36b',28);say(`${clean(nick)} ได้${g?g.s2.replace(/^[^ก-๙A-Za-z]+/,''):'พลังพิเศษ'}!`,2);feed(`🎁 ${nick}: ${g?g.fx:'เลือดสูงสุด +'+25*n}${n>1&&g?' x'+n:''}${hpTxt}`)}}
 /* ---------- fighter drawing ---------- */
 function avDraw(f,x,y,r){ctx.save();ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.clip();let h=0;for(const c of f.nick)h=(h*31+c.charCodeAt(0))>>>0;ctx.fillStyle=`hsl(${h%360},60%,55%)`;ctx.fillRect(x-r,y-r,2*r,2*r);
  if(f.img&&f.img.complete&&f.img.naturalWidth)ctx.drawImage(f.img,x-r,y-r,2*r,2*r);else{ctx.fillStyle='#fff';ctx.font='600 15px Mitr, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText([...f.nick][0]||'?',x,y+1)}ctx.restore();
@@ -318,11 +321,11 @@ function phaseTick(dt){const alive=S.f.filter(f=>!f.ko);
    if(S.timer<=0){if(alive.length>=2)startFight();else{S.timer=15;say('รอนักมวยเพิ่มอีกนิด! พิมพ์ ลง เพื่อขึ้นเวที!',2)}}}}
  else if(S.phase==='fight'){S.timer-=dt;if(alive.length<=1&&S.f.length>=1)endRound(alive[0],false);else if(S.timer<=0){alive.sort((a,b)=>b.hp/b.max-a.hp/a.max);endRound(alive[0],true)}}}
 function startFight(){if(S.phase!=='lobby')return;if(S.f.filter(f=>!f.ko).length<2){banner('ยังเริ่มไม่ได้','ต้องมีนักมวยบนเวทีอย่างน้อย 2 คน',2500);return}
- S.phase='fight';S.timer=CFG.fight;for(const f of S.f)if(f.crown>0)f.crown=15;bell();say(`ยกที่ ${S.round}! ชก! ปิดรับบัฟแล้ว!`,3);banner(`🔔 ยกที่ ${S.round}`,'ชก! ปิดรับบัฟแล้ว',1800)}
+ S.phase='fight';S.timer=CFG.fight;for(const f of S.f)if(f.crown>0)f.crown=15;bell();say(`ยกที่ ${S.round}! ชก! เคาะใจรัวๆ ฟื้นเลือดให้นักมวยของคุณ!`,3);banner(`🔔 ยกที่ ${S.round}`,'ชก! ❤️ เคาะใจ = ฟื้นเลือด',2200)}
 function endRound(w,byTime){if(S.phase!=='fight')return;S.phase='end';
  if(w){w.isChamp=1;S.champ=w.id;banner(byTime?'⏰ หมดเวลา!':'🏆 แชมป์ยกที่ '+S.round,w.nick+(byTime?' เลือดเหลือมากสุด ชนะ!':' ยืนหนึ่งบนสังเวียน!'),4500);say(byTime?`หมดเวลา! ผู้ชนะคือ ${clean(w.nick)}!`:`แชมป์ยกนี้คือ ${clean(w.nick)}! ยืนหนึ่งบนสังเวียน!`,3)}
  setTimeout(newLobby,5000)}
-function newLobby(){S.round++;const c=S.f.find(f=>f.id===S.champ&&!f.ko);S.f=[];if(c){Object.assign(c,{hp:100,max:100,pow:0,powT:0,weap:null,giant:0,crown:0,shield:0,stun:0,streak:0,isChamp:1,enter:0});S.f.push(c)}
+function newLobby(){S.round++;const c=S.f.find(f=>f.id===S.champ&&!f.ko);S.f=[];if(c){Object.assign(c,{chatHp:0,hp:100,max:100,pow:0,powT:0,weap:null,giant:0,crown:0,shield:0,stun:0,streak:0,isChamp:1,enter:0});S.f.push(c)}
  S.phase='lobby';S.timer=CFG.lobby;S.lastSec=null;say(`เปิดรับนักมวยยกที่ ${S.round}! พิมพ์ ลง เพื่อขึ้นเวที!`,2)}
 function uiTick(){const cd=$('cd');if(S.phase==='lobby'){cd.style.display='block';if(CFG.auto){$('cd1').textContent=`ยกที่ ${S.round} เริ่มชกใน`;$('cd2').textContent=fmt(S.timer)}else{$('cd1').textContent=`ยกที่ ${S.round}`;$('cd2').textContent='รอเริ่ม'}
   $('cd3').textContent='พิมพ์ "ลง" ขึ้นเวที • "เลือด" / "ตี" / ของขวัญ บัฟได้ก่อนระฆังเท่านั้น!';$('ph').textContent='⏳ ช่วงลงเวที'}

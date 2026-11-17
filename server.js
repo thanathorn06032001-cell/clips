@@ -71,6 +71,23 @@ function broadcast(obj) {
 function status(text) { lastStatus = text; broadcast({ type: 'status', text }); console.log('[status]', text); }
 // ราคาเพชรสำรอง เผื่อข้อมูลของขวัญไม่ส่งราคามา
 const GIFT_PRICE = { rose: 1, tiktok: 1, 'finger heart': 5, 'heart me': 1, perfume: 20, doughnut: 30, 'hand hearts': 100, corgi: 299, 'money gun': 500, galaxy: 1000, lion: 29999, universe: 34999 };
+const GIFT_ID = { 5655: ['Rose', 1], 5269: ['TikTok', 1], 5487: ['Finger Heart', 5], 6064: ['GG', 1], 5827: ['Ice Cream Cone', 1], 7934: ['Heart Me', 1], 5658: ['Perfume', 20], 5879: ['Doughnut', 30], 5660: ['Hand Hearts', 100], 7168: ['Money Gun', 500], 11046: ['Galaxy', 1000], 6820: ['Whale diving', 2150], 6369: ['Lion', 29999], 7312: ['TikTok Universe', 44999] };
+const giftSeen = new Map();
+function giftInfo(d) {
+  const gd = d.giftDetails || d.extendedGiftInfo || d.gift || {};
+  let name = gd.giftName || gd.name || d.giftName || '';
+  let dia = Number(gd.diamondCount || gd.diamond_count || 0);
+  const byId = GIFT_ID[d.giftId];
+  if (!name && byId) name = byId[0];
+  if (!dia && byId) dia = byId[1];
+  if (!name) { // ลองหาจากข้อความที่ TikTok แสดง เช่น "ส่ง กุหลาบ"
+    const t = [d.common?.describe, d.trayDisplayText?.defaultPattern, d.displayTextForAudience?.defaultPattern].find(x => typeof x === 'string' && x) || '';
+    const m = t.match(/(?:sent|ส่ง)\s+(.+?)(?:\s*x\s*\d+)?$/i); if (m) name = m[1].trim();
+  }
+  const known = !!name;
+  if (!dia) dia = GIFT_PRICE[(name || '').toLowerCase()] || (/กุหลาบ/.test(name) ? 1 : 1);
+  return { name: name || 'ของขวัญ', diamonds: dia, known };
+}
 const picUrl = x => x?.urlList?.[0] || x?.url?.[0] || x?.urls?.[0] || '';
 const who = d => ({ user: d?.user?.uniqueId || '', nick: d?.user?.nickname || d?.user?.uniqueId || 'ผู้ชม',
   avatar: picUrl(d?.user?.avatarThumb) || picUrl(d?.user?.avatarMedium) || picUrl(d?.user?.avatarLarge) || picUrl(d?.user?.profilePicture) || '' });
@@ -121,15 +138,21 @@ async function connectTo(username) {
   c.on(WebcastEvent.FOLLOW, d => broadcast({ type: 'follow', ...who(d) }));
   c.on(WebcastEvent.SHARE, d => broadcast({ type: 'share', ...who(d) }));
   c.on(WebcastEvent.GIFT, d => {
-    const giftType = d.giftDetails?.giftType;
-    if (giftType === 1 && !d.repeatEnd) return; // รอให้คอมโบจบก่อน ค่อยนับทีเดียว
-    console.log('[gift]', d?.user?.uniqueId, d.giftDetails?.giftName, d.repeatCount);
-    broadcast({
-      type: 'gift', ...who(d),
-      giftName: d.giftDetails?.giftName || 'ของขวัญ',
-      diamonds: d.giftDetails?.diamondCount || d.gift?.diamondCount || GIFT_PRICE[(d.giftDetails?.giftName || '').toLowerCase()] || 1,
-      count: d.repeatCount || 1,
-    });
+    const info = giftInfo(d);
+    const rc = Math.max(1, Number(d.repeatCount) || Number(d.comboCount) || 1);
+    // นับเฉพาะส่วนที่เพิ่มขึ้นของคอมโบ (กันนับซ้ำ แม้ TikTok ไม่บอกชนิดของขวัญ)
+    const key = (d?.user?.uniqueId || '') + '|' + (d.giftId || info.name) + '|' + (d.groupId || '');
+    const now = Date.now(), last = giftSeen.get(key);
+    let count = rc;
+    if (last && now - last.t < 30000) {
+      if (rc > last.n) count = rc - last.n;
+      else if (rc === last.n && (d.repeatEnd || now - last.t < 1500)) { last.t = now; return; }
+    }
+    giftSeen.set(key, { n: rc, t: now });
+    if (giftSeen.size > 500) for (const [k, v] of giftSeen) if (now - v.t > 60000) giftSeen.delete(k);
+    console.log('[gift]', d?.user?.uniqueId, info.name, 'id', d.giftId, 'x', count);
+    if (!info.known) { try { broadcast({ type: 'debug', text: 'gift id=' + d.giftId + ' ' + JSON.stringify(d, (k, v) => (k === 'user' || k === 'toUser' || /image|Image|url|Url|icon|Icon/.test(k)) ? undefined : v).slice(0, 400) }); } catch {} }
+    broadcast({ type: 'gift', ...who(d), giftName: info.name, giftId: d.giftId || 0, diamonds: info.diamonds, count });
   });
   c.on(ControlEvent.DISCONNECTED, () => {
     if (conn !== c) return;
