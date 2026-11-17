@@ -75,6 +75,26 @@ const picUrl = x => x?.urlList?.[0] || x?.url?.[0] || x?.urls?.[0] || '';
 const who = d => ({ user: d?.user?.uniqueId || '', nick: d?.user?.nickname || d?.user?.uniqueId || 'ผู้ชม',
   avatar: picUrl(d?.user?.avatarThumb) || picUrl(d?.user?.avatarMedium) || picUrl(d?.user?.avatarLarge) || picUrl(d?.user?.profilePicture) || '' });
 
+// ดึงข้อความคอมเมนต์ให้ได้ แม้ TikTok เปลี่ยนชื่อฟิลด์
+function chatText(d) {
+  if (!d) return '';
+  const direct = d.comment ?? d.content ?? d.text ?? d.message ?? d.common?.displayText?.defaultPattern;
+  if (typeof direct === 'string' && direct.trim()) return direct.trim();
+  let found = '';
+  const seen = new Set();
+  (function walk(o, depth) {
+    if (found || !o || typeof o !== 'object' || depth > 4 || seen.has(o)) return;
+    seen.add(o);
+    for (const [k, v] of Object.entries(o)) {
+      if (found) return;
+      if (k === 'user' || k === 'atUser' || /image|url|avatar|nickname|uniqueId|signature|language|key/i.test(k)) continue;
+      if (typeof v === 'string' && /comment|content|text/i.test(k) && v.trim() && !/^https?:/.test(v)) { found = v.trim(); return; }
+      if (typeof v === 'object') walk(v, depth + 1);
+    }
+  })(d, 0);
+  return found;
+}
+
 async function connectTo(username) {
   clearTimeout(retryTimer);
   username = String(username || '').replace(/^@/, '').trim();
@@ -89,7 +109,13 @@ async function connectTo(username) {
   });
   conn = c;
 
-  c.on(WebcastEvent.CHAT, d => { console.log('[chat]', d?.user?.uniqueId, d.comment); broadcast({ type: 'chat', ...who(d), comment: d.comment || '' }); });
+  c.on(WebcastEvent.CHAT, d => {
+    const text = chatText(d);
+    console.log('[chat]', d?.user?.uniqueId, JSON.stringify(text));
+    if (!text) { try { broadcast({ type: 'debug', text: 'chat ว่าง keys=' + Object.keys(d || {}).join(',') + ' ' + JSON.stringify(d, (k, v) => (k === 'user' || k === 'atUser' || /image|Image|url|Url/.test(k)) ? undefined : v).slice(0, 400) }); } catch {} }
+    broadcast({ type: 'chat', ...who(d), comment: text });
+  });
+  c.on(WebcastEvent.EMOTE, d => broadcast({ type: 'chat', ...who(d), comment: '[emote]' }));
   c.on(WebcastEvent.MEMBER, d => broadcast({ type: 'member', ...who(d) }));
   c.on(WebcastEvent.LIKE, d => broadcast({ type: 'like', ...who(d), count: d.likeCount || 1, total: d.totalLikeCount || 0 }));
   c.on(WebcastEvent.FOLLOW, d => broadcast({ type: 'follow', ...who(d) }));
