@@ -90,6 +90,7 @@ body.live #gear{display:none}
  <div class="row"><input id="ttUser" placeholder="ชื่อ TikTok"><button id="bConn">เชื่อมต่อ</button></div>
  <div class="st" id="wst">โหมดทดสอบ</div>
  <div class="st" id="dbg" style="color:#9fe;max-width:330px;white-space:pre-wrap;word-break:break-all">📨 ยังไม่มีข้อมูลเข้าจาก TikTok</div>
+ <div class="st" id="ldbg" style="color:#ffb0c8;max-width:330px;word-break:break-all">❤️ ยังไม่มีไลก์เข้ามา</div>
  <div class="row">ทดสอบ: <button data-s="join5">+5 ลง</button><button data-s="heal">hp</button><button data-s="pow">ดาเมจ</button><button data-s="rose">🌹</button><button data-s="gold">🥊</button><button data-s="pan">🍳</button><button data-s="giant">🌌</button><button data-s="whale">🐋</button></div>
 </div>
 <script>
@@ -167,16 +168,17 @@ function addDmg(f,n){f.dmgB=(f.dmgB||0)+n}
 function giftFallback(f,d){if(d>=500){f.giant=1;addMax(f,200)}else if(d>=100)f.weap=pick(['knuckle','hammer','fish','pan']);else if(d>=10){addDmg(f,5*d);addMax(f,30)}else addMax(f,30*d)}
 /* ---------- events (same format as shrine server) ---------- */
 const CD={};function cool(k,s){const n=Date.now();if(CD[k]&&n-CD[k]<s*1000)return false;CD[k]=n;return true}
+function likeDbg(e,f){const d=document.getElementById('ldbg');if(d)d.textContent=`❤️ ไลก์ล่าสุด: ${e.nick||'?'} (${e.user||'-'}) x${e.count||1} → ${f?'เจอนักมวย HP '+Math.round(f.hp)+'/'+f.max:'ไม่เจอนักมวยของคนนี้'} • ช่วง: ${S.phase}`}
 let dbgN=0,dbgL=[];function dbg(e){dbgN++;if(e.type==='like')return;dbgL.unshift((e.type==='chat'?'💬 ':e.type==='gift'?'🎁 ':'• ')+(e.nick||e.user||'?')+': '+(e.comment||e.giftName||e.type));dbgL.length=Math.min(dbgL.length,4);const d=document.getElementById('dbg');if(d)d.textContent='📨 ได้รับ '+dbgN+' รายการ\n'+dbgL.join('\n')}
 function handle(e){if(e&&e._sim!==1)dbg(e);const id=e.user||e.nick,nick=String(e.nick||'ผู้ชม').slice(0,14);
  if(e.type==='chat'){const t=String(e.comment||'');
-  const tc=t.replace(/[\u200b-\u200f\ufeff\s.!~,]+/g,' ').trim();if(/^(ลง|ลงๆ+|ลงค่ะ|ลงครับ|ขึ้นเวที|เข้า|join|1)( |$)/i.test(tc)||/ลงเวที|ลงด้วย/.test(tc)){const f=fighter(id,nick,e.avatar);if(f){txt(...toXY(f.tu,f.v),'ขึ้นเวที!','#fff');if(cool('joinvo',7))vo('join',0)}return}
+  const tc=t.replace(/[\u200b-\u200f\ufeff\s.!~,]+/g,' ').trim();if(/^(ลง|ลงๆ+|ลงค่ะ|ลงครับ|ขึ้นเวที|เข้า|join|1)( |$)/i.test(tc)||/ลงเวที|ลงด้วย/.test(tc)){const f=fighter(id,nick,e.avatar);if(f&&e.uid)f.uid=e.uid;if(f){txt(...toXY(f.tu,f.v),'ขึ้นเวที!','#fff');if(cool('joinvo',7))vo('join',0)}return}
   const f=S.f.find(x=>x.id===id&&!x.ko);if(!f)return;const [x,y]=toXY(f.u,f.v);
   if(S.phase!=='lobby'){if(/^\s*(hp|เลือด|ฮีล|heal|ดาเมจ|damage|dmg|ตี)/i.test(t)&&cool(id+'lk',8))txt(x,y-130*scl(f.v,f.u),'🔒 ชกอยู่ บัฟไม่ได้','#aaa',18);return}
   if(/^\s*(hp|เอชพี|เลือด|ฮีล|heal)/i.test(t)&&cool(id+'h',1)){addMax(f,10);txt(x+rnd(-10,10),y-130*scl(f.v,f.u),'+10 HP','#5dff7a')}
   if(/^\s*(ดาเมจ|ดาเมท|damage|dmg|ตี)/i.test(t)&&cool(id+'p',1)){addDmg(f,1);txt(x+rnd(-10,10),y-130*scl(f.v,f.u),'+1 ดาเมจ','#ff9b2f')}
 }
- if(e.type==='like'){const f=S.f.find(x=>x.id===id&&!x.ko);if(!f)return;if(S.phase!=='fight'){return}
+ if(e.type==='like'){const f=S.f.find(x=>!x.ko&&(x.id===id||(e.uid&&x.uid===e.uid)||(nick!=='ผู้ชม'&&x.nick===nick)));likeDbg(e,f);if(!f)return;if(S.phase!=='fight'){return}
   f.likeQ=(f.likeQ||0)+(e.count||1);const [x,y]=toXY(f.u,f.v);if(f.hp<f.max){if(cool(id+'lf',6))feed(`❤️ ${nick} เคาะใจ ฟื้นฟู HP (+0.5 ต่อใจ)`)}else if(cool(id+'lm',6))txt(x,y-118*scl(f.v,f.u),'❤️ HP เต็มแล้ว','#ffb0c8',16)}
  if(e.type==='gift'){if(S.phase!=='lobby'){const on=S.f.find(x=>x.id===id&&!x.ko);if(!on)fighter(id,nick,e.avatar);if(on){const [x,y]=toXY(on.u,on.v);txt(x,y-140*scl(on.v,on.u),'🔒 ช่วงชก บัฟไม่ได้','#aaa',18)}feed(`🎁 ${nick} ส่ง ${e.giftName||'ของขวัญ'} (ช่วงชก ยังไม่มีผล)`);return}
   const f=fighter(id,nick,e.avatar)||S.f.find(x=>x.id===id);if(!f)return;const g=GIFTS.find(x=>x.re.test(e.giftName||''));const n=Math.min(10,Math.max(1,e.count||1));for(let k=0;k<n;k++){if(g)g.run(f);else giftFallback(f,e.diamonds||1)}const hpTxt=` (HP ${Math.round(f.hp)}/${f.max} • ดาเมจ ${atk(f)})`;
@@ -230,7 +232,7 @@ function hudF(f){const [x,y]=toXY(f.u,f.v),s=scl(f.v,f.u)*(f.giant?1.6:1);
 /* ---------- simulation ---------- */
 function step(dt){const live=S.f.filter(f=>!f.ko);
  for(const f of S.f){if(f.ko){f.likeQ=0;if(S.t-f.koT>3)f.gone=1;continue}
-  if(f.likeQ>0){f.lt=(f.lt||0)+dt;const step=Math.max(.02,Math.min(.09,1.2/f.likeQ));while(f.lt>=step&&f.likeQ>0){f.lt-=step;f.likeQ--;if(S.phase==='fight'&&f.hp<f.max){f.hp=Math.min(f.max,f.hp+.5);if(Math.random()<.5){const [hx,hy]=toXY(f.u,f.v);S.parts.push({type:'t',x:hx+rnd(-16,16),y:hy-112*scl(f.v,f.u),vy:-70,life:.7,max:.7,t:'❤️+0.5',c:'#ff8ab4',sz:17})}}}if(f.likeQ<=0)f.lt=0}
+  if(f.likeQ>0){f.lt=(f.lt||0)+dt;const step=Math.max(.015,Math.min(.06,.8/f.likeQ));while(f.lt>=step&&f.likeQ>0){f.lt-=step;f.likeQ--;if(S.phase==='fight'&&f.hp<f.max){f.hp=Math.min(f.max,f.hp+.5);if(Math.random()<.5){const [hx,hy]=toXY(f.u,f.v);S.parts.push({type:'t',x:hx+rnd(-16,16),y:hy-112*scl(f.v,f.u),vy:-70,life:.7,max:.7,t:'❤️+0.5',c:'#ff8ab4',sz:17})}}}if(f.likeQ<=0)f.lt=0}
   f.hit=Math.max(0,f.hit-dt*2);if(f.punch>0){f.punch+=dt*4;if(f.punch>=1)f.punch=0}if(f.powT>0){f.powT-=dt;if(f.powT<=0)f.pow=0}if(S.phase==='fight'){if(f.shield>0)f.shield-=dt;if(f.crown>0)f.crown-=dt}if(f.stun>0){f.stun-=dt;continue}
   if(f.enter){const du=f.tu-f.u;f.dir=du>=0?1:-1;f.u+=Math.sign(du)*Math.min(Math.abs(du),.25*dt);if(Math.abs(du)<.01)f.enter=0;continue}
   if(S.phase!=='fight')continue;

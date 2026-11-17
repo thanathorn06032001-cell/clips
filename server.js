@@ -140,7 +140,7 @@ function giftInfo(d) {
   return { name: name || 'ของขวัญ', diamonds: dia, known };
 }
 const picUrl = x => x?.urlList?.[0] || x?.url?.[0] || x?.urls?.[0] || '';
-const who = d => ({ user: d?.user?.uniqueId || '', nick: d?.user?.nickname || d?.user?.uniqueId || 'ผู้ชม',
+const who = d => ({ user: d?.user?.uniqueId || String(d?.user?.userId || d?.user?.id || ''), uid: String(d?.user?.userId || d?.user?.id || ''), nick: d?.user?.nickname || d?.user?.uniqueId || 'ผู้ชม',
   avatar: picUrl(d?.user?.avatarThumb) || picUrl(d?.user?.avatarMedium) || picUrl(d?.user?.avatarLarge) || picUrl(d?.user?.profilePicture) || '' });
 
 // ดึงข้อความคอมเมนต์ให้ได้ แม้ TikTok เปลี่ยนชื่อฟิลด์
