@@ -185,6 +185,7 @@ function init() {
   const planeG = new THREE.PlaneGeometry(1, 1);
   const black = mat(0x1a0f0a), white = mat(0xffffff), red = mat(0xd81828), gold = mat(0xffc430, { emissive: 0x6a4000 }), gloveRed = mat(0xe0142a, { emissive: 0x300000 });
   const UP = new THREE.Vector3(0, 1, 0);
+  const spikeG = new THREE.ConeGeometry(.045, .14, 6); spikeG.translate(0, .07, 0); const spikeM = mat(0xe8e8f0, { emissive: 0x303040 }), gloveSpike = mat(0x2a2630, { emissive: 0x100008 });
 
   function makeF(f) {
     const root = new THREE.Group(), body = new THREE.Group(); root.add(body);
@@ -210,7 +211,11 @@ function init() {
     mesh(G.sph, mat(0xff8a8a), [.06, .035, .02], [-.27, -.07, .32], head); mesh(G.sph, mat(0xff8a8a), [.06, .035, .02], [.27, -.07, .32], head);
     // arms + gloves
     o.arms = [-1, 1].map(s => mesh(G.cap, skin, [.07, .2, .07], null, body));
-    o.gloves = [-1, 1].map(s => { const g = new THREE.Group(); body.add(g); o['gm' + s] = mesh(G.sph, gloveRed, [.21, .2, .23], null, g); mesh(G.cyl, white, [.13, .08, .13], [0, 0, -.2], g).rotation.x = Math.PI / 2; return g; });
+    o.gloves = [-1, 1].map(s => { const g = new THREE.Group(); body.add(g); o['gm' + s] = mesh(G.sph, gloveRed, [.21, .2, .23], null, g); mesh(G.cyl, white, [.13, .08, .13], [0, 0, -.2], g).rotation.x = Math.PI / 2;
+      const sp = new THREE.Group(); g.add(sp); o['sp' + s] = sp; sp.visible = false;
+      for (let i = 0; i < 14; i++) { const ph = Math.acos(1 - 2 * (i + .5) / 14), th = i * 2.4; const dir = new THREE.Vector3(Math.sin(ph) * Math.cos(th), Math.cos(ph), Math.sin(ph) * Math.sin(th)); if (dir.z < -.55) continue;
+        const c = mesh(spikeG, spikeM, null, null, sp); c.position.set(dir.x * .2, dir.y * .19, dir.z * .22); c.quaternion.setFromUnitVectors(UP, dir); }
+      return g; });
     // weapons on right glove
     const wg = o.gloves[1];
     o.pan = new THREE.Group(); wg.add(o.pan); mesh(G.cyl, mat(0x5a3a1a), [.04, .45, .04], [0, .25, .1], o.pan).rotation.x = .4; const pd = mesh(G.cyl, mat(0x222222), [.32, .06, .32], [0, .55, .25], o.pan); pd.rotation.x = 1.3; mesh(G.cyl, mat(0xffc040), [.12, .07, .12], [0, .56, .27], o.pan).rotation.x = 1.3;
@@ -278,7 +283,7 @@ function init() {
         o.gloves[i].position.copy(gl); o.gloves[i].rotation.x = ext * .3;
         sh.set(s * .27, .9, .02); setArm(o.arms[i], sh, gl);
       });
-      const gm = f.weap === 'gold' || f.weap === 'knuckle' ? gold : gloveRed; o['gm-1'].material = gm; o['gm1'].material = gm;
+      const gm = f.weap === 'gold' ? gloveSpike : f.weap === 'knuckle' ? gold : gloveRed; o['gm-1'].material = gm; o['gm1'].material = gm; o['sp-1'].visible = o['sp1'].visible = f.weap === 'gold';
       const gsz = f.weap === 'gold' ? 1.25 : 1; o.gloves.forEach(g => g.scale.setScalar(gsz));
       o.pan.visible = f.weap === 'pan'; o.hammer.visible = f.weap === 'hammer'; o.fish.visible = f.weap === 'fish';
       o.crown.visible = !f.ko && (f.crown > 0 || !!f.isChamp);

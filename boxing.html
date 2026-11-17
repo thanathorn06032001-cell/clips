@@ -125,7 +125,7 @@ function hitSfx(big){const c=au();if(!c)return;const t=c.currentTime,o=c.createO
 /* ---------- state ---------- */
 const S={t:0,f:[],q:[],parts:[],ko:{},round:1,feed:[],whale:null,spot:0};
 const MAXON=40;
-const WEAP={gold:{n:'นวมทอง',mul:2},knuckle:{n:'สนับมือทอง',mul:1.6},pan:{n:'กระทะ',mul:1.8,stun:1},hammer:{n:'ค้อนยางบีบดัง',mul:1.4,knock:1},fish:{n:'ปลาทูยักษ์',mul:1.5,knock:1}};
+const WEAP={gold:{n:'นวมหนาม',mul:2},knuckle:{n:'สนับมือทอง',mul:1.6},pan:{n:'กระทะ',mul:1.8,stun:1},hammer:{n:'ค้อนยางบีบดัง',mul:1.4,knock:1},fish:{n:'ปลาทูยักษ์',mul:1.5,knock:1}};
 const TRUNK=['#e8203a','#2f74e0','#20b060','#ffb000','#a040e0','#ff6ab0','#20c0c0','#ff7a1a'];
 function fighter(id,nick,av){let f=S.f.find(x=>x.id===id);if(f)return f;if(S.phase!=='lobby'){if(!S.q.find(x=>x.id===id)){S.q.push({id,nick,av});txtQ(nick)}return null}if(S.f.filter(x=>!x.ko).length>=MAXON){if(!S.q.find(x=>x.id===id))S.q.push({id,nick,av});return null}
  const side=Math.random()<.5;f={id,nick,av,u:side?-.05:1.05,v:rnd(.1,.95),tu:rnd(.2,.8),hp:100,max:100,dmg:1,pow:0,powT:0,shield:0,weap:null,giant:0,crown:0,dir:side?1:-1,cd:rnd(.2,1),punch:0,hit:0,ko:0,koT:0,trunk:pick(TRUNK),img:av?mkImg(av):null,hair:pick(['#1a0d08','#3b2014','#111','#d4a020']),skin:pick(['#f6d2ad','#e8b88a','#d9a070']),enter:1};S.f.push(f);return f}
@@ -136,15 +136,15 @@ function star(x,y,r,c){ctx.fillStyle=c;ctx.beginPath();for(let i=0;i<10;i++){con
 let bannerT;function banner(t,p,ms=3500){$('bnT').textContent=t;$('bnP').textContent=p;const b=$('banner');b.style.display='block';b.firstElementChild.style.animation='none';void b.offsetWidth;b.firstElementChild.style.animation='';clearTimeout(bannerT);bannerT=setTimeout(()=>b.style.display='none',ms)}
 /* ---------- gifts ---------- */
 const GIFTS=[
- {re:/universe|จักรวาล/i,short:'Universe',s2:'แชมป์จักรวาล',icon:'🌌',n:'TikTok Universe',fx:'แชมป์จักรวาล: ยักษ์+นวมทอง+อมตะ 15 วิ',run:f=>{f.giant=1;f.weap='gold';f.crown=15;f.hp=f.max=300;banner('🌌 แชมป์จักรวาล!',f.nick+' กลายร่างเป็นยักษ์ทองคำ')}},
- {re:/whale|วาฬ/i,short:'ปลาวาฬ',s2:'ฟาดทั้งเวที',icon:'🐋',n:'ดำน้ำดูปลาวาฬ',fx:'วาฬยักษ์ฟาดเวที คนอื่นเลือดหาย 50%',run:f=>{S.whale={x:-300,by:f.nick,id:f.id};banner('🐋 วาฬถล่มเวที!','จาก '+f.nick);say(`ปลาวาฬของ ${clean(f.nick)} ถล่มเวทีแล้ว!`,3)}},
- {re:/galaxy|กาแล็กซี/i,short:'Galaxy',s2:'ร่างยักษ์',icon:'💥',n:'Galaxy',fx:'ร่างยักษ์ เลือด x3',run:f=>{f.giant=1;addMax(f,200)}},
- {re:/money ?gun|ปืน/i,short:'Money Gun',s2:'🍳 กระทะ',icon:'🍳',n:'Money Gun',fx:'กระทะทองเหลือง ต่อยแล้วมึน',run:f=>{f.weap='pan'}},
- {re:/hand ?hearts|มือ/i,short:'Hand Hearts',s2:'🥊 นวมทอง',icon:'🥊',n:'Hand Hearts',fx:'นวมทอง ดาเมจ x2',run:f=>{f.weap='gold'}},
+ {re:/universe|จักรวาล/i,short:'Universe',s2:'แชมป์จักรวาล',icon:'🪐',n:'TikTok Universe',fx:'แชมป์จักรวาล: ยักษ์+นวมหนาม+อมตะ 15 วิ',run:f=>{f.giant=1;f.weap='gold';f.crown=15;f.hp=f.max=300;banner('🌌 แชมป์จักรวาล!',f.nick+' กลายร่างเป็นยักษ์ทองคำ')}},
+ {re:/whale|วาฬ/i,short:'ปลาวาฬ',s2:'ฟาดทั้งเวที',icon:'🐳',n:'ดำน้ำดูปลาวาฬ',fx:'วาฬยักษ์ฟาดเวที คนอื่นเลือดหาย 50%',run:f=>{S.whale={x:-300,by:f.nick,id:f.id};banner('🐋 วาฬถล่มเวที!','จาก '+f.nick);say(`ปลาวาฬของ ${clean(f.nick)} ถล่มเวทีแล้ว!`,3)}},
+ {re:/galaxy|กาแล็กซี/i,short:'Galaxy',s2:'ร่างยักษ์',icon:'🌌',n:'Galaxy',fx:'ร่างยักษ์ เลือด x3',run:f=>{f.giant=1;addMax(f,200)}},
+ {re:/money ?gun|ปืน/i,short:'Money Gun',s2:'🍳 กระทะ',icon:'💸',n:'Money Gun',fx:'กระทะทองเหลือง ต่อยแล้วมึน',run:f=>{f.weap='pan'}},
+ {re:/hand ?hearts|มือ/i,short:'Hand Hearts',s2:'🥊 นวมหนาม',icon:'🫶',n:'Hand Hearts',fx:'นวมหนาม ดาเมจ x2',run:f=>{f.weap='gold'}},
  {re:/doughnut|donut|โดนัท/i,short:'โดนัท',s2:'+100 HP',icon:'🍩',n:'โดนัท',fx:'HP +100',run:f=>addMax(f,100)},
- {re:/hippo|ฮิปโป/i,short:'ฮิปโปน้อย',s2:'🐟 ปลาทู',icon:'🐟',n:'ฮิปโปน้อย',fx:'ปลาทูยักษ์ ตบกระเด็น',run:f=>{f.weap='fish'}},
- {re:/garland|มาลัย/i,short:'พวงมาลัย',s2:'🛡️ ประเจียด',icon:'🛡️',n:'พวงมาลัย',fx:'ประเจียดกันดาเมจทั้งยก',run:f=>{f.shield=9999}},
- {re:/finger ?heart|ฟิงเกอร์/i,short:'ฟิงเกอร์ฮาร์ท',s2:'+25 ดาเมจ',icon:'🔥',n:'ฟิงเกอร์ฮาร์ท',fx:'ดาเมจ +25',run:f=>addDmg(f,25)},
+ {re:/hippo|ฮิปโป/i,short:'ฮิปโปน้อย',s2:'🐟 ปลาทู',icon:'🦛',n:'ฮิปโปน้อย',fx:'ปลาทูยักษ์ ตบกระเด็น',run:f=>{f.weap='fish'}},
+ {re:/garland|มาลัย/i,short:'พวงมาลัย',s2:'🛡️ ประเจียด',icon:'💐',n:'พวงมาลัย',fx:'ประเจียดกันดาเมจทั้งยก',run:f=>{f.shield=9999}},
+ {re:/finger ?heart|ฟิงเกอร์/i,short:'ฟิงเกอร์ฮาร์ท',s2:'+25 ดาเมจ',icon:'🫰',n:'ฟิงเกอร์ฮาร์ท',fx:'ดาเมจ +25',run:f=>addDmg(f,25)},
  {re:/tiktok|ติ๊กต๊อก/i,short:'TikTok',s2:'+5 ดาเมจ',icon:'🎵',n:'TikTok',fx:'ดาเมจ +5',run:f=>addDmg(f,5)},
  {re:/rose|rosa|กุหลาบ|โรซ่า/i,short:'กุหลาบ',s2:'+30 HP',icon:'🌹',n:'กุหลาบ',fx:'HP +30',run:f=>addMax(f,30)},
 ];
