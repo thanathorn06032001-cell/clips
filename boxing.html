@@ -54,8 +54,9 @@ body.live #gear{display:none}
 #gstrip{left:0;right:0;top:52px;height:86px;overflow:hidden}
 #gstrip .rail{display:flex;gap:7px;position:absolute;left:0;top:0;animation:gslide 30s linear infinite}
 @keyframes gslide{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-#gstrip .card{width:100px;height:84px;flex:none;border-radius:13px;background:linear-gradient(165deg,rgba(255,150,40,.5),rgba(60,16,90,.9) 60%);border:1.5px solid rgba(255,210,120,.6);text-align:center;padding-top:3px}
-#gstrip .card .ic{height:36px;display:flex;align-items:center;justify-content:center;font-size:30px;line-height:1}#gstrip .card img{width:36px;height:36px;object-fit:contain}
+#gstrip .card .cn{position:absolute;right:4px;top:3px;font-size:10.5px;background:rgba(0,0,0,.6);border-radius:7px;padding:0 4px;color:#ffe36b}
+#gstrip .card{position:relative;width:100px;height:84px;flex:none;border-radius:13px;background:linear-gradient(165deg,rgba(255,150,40,.5),rgba(60,16,90,.9) 60%);border:1.5px solid rgba(255,210,120,.6);text-align:center;padding-top:3px}
+#gstrip .card .ic{height:40px;display:flex;align-items:center;justify-content:center;font-size:30px;line-height:1}#gstrip .card img{width:42px;height:42px;object-fit:contain}
 #gstrip .card b{display:block;font-size:12px;font-weight:500;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 3px}
 #gstrip .card small{display:inline-block;margin-top:1px;padding:0 7px;border-radius:8px;background:linear-gradient(#ffe36b,#ffb020);color:#4a1a00;font-size:11px;font-weight:600}
 #htip{left:0;right:0;top:930px;text-align:center;display:none}
@@ -136,21 +137,29 @@ function star(x,y,r,c){ctx.fillStyle=c;ctx.beginPath();for(let i=0;i<10;i++){con
 let bannerT;function banner(t,p,ms=3500){$('bnT').textContent=t;$('bnP').textContent=p;const b=$('banner');b.style.display='block';b.firstElementChild.style.animation='none';void b.offsetWidth;b.firstElementChild.style.animation='';clearTimeout(bannerT);bannerT=setTimeout(()=>b.style.display='none',ms)}
 /* ---------- gifts ---------- */
 const GIFTS=[
- {re:/universe|จักรวาล/i,short:'Universe',s2:'แชมป์จักรวาล',icon:'🪐',n:'TikTok Universe',fx:'แชมป์จักรวาล: ยักษ์+นวมหนาม+อมตะ 15 วิ',run:f=>{f.giant=1;f.weap='gold';f.crown=15;f.hp=f.max=300;banner('🌌 แชมป์จักรวาล!',f.nick+' กลายร่างเป็นยักษ์ทองคำ')}},
- {re:/whale|วาฬ/i,short:'ปลาวาฬ',s2:'ฟาดทั้งเวที',icon:'🐳',n:'ดำน้ำดูปลาวาฬ',fx:'วาฬยักษ์ฟาดเวที คนอื่นเลือดหาย 50%',run:f=>{S.whale={x:-300,by:f.nick,id:f.id};banner('🐋 วาฬถล่มเวที!','จาก '+f.nick);say(`ปลาวาฬของ ${clean(f.nick)} ถล่มเวทีแล้ว!`,3)}},
- {re:/galaxy|กาแล็กซี/i,short:'Galaxy',s2:'ร่างยักษ์',icon:'🌌',n:'Galaxy',fx:'ร่างยักษ์ เลือด x3',run:f=>{f.giant=1;addMax(f,200)}},
- {re:/money ?gun|ปืน/i,short:'Money Gun',s2:'🍳 กระทะ',icon:'💸',n:'Money Gun',fx:'กระทะทองเหลือง ต่อยแล้วมึน',run:f=>{f.weap='pan'}},
- {re:/hand ?hearts|มือ/i,short:'Hand Hearts',s2:'🥊 นวมหนาม',icon:'🫶',n:'Hand Hearts',fx:'นวมหนาม ดาเมจ x2',run:f=>{f.weap='gold'}},
- {re:/doughnut|donut|โดนัท/i,short:'โดนัท',s2:'+100 HP',icon:'🍩',n:'โดนัท',fx:'HP +100',run:f=>addMax(f,100)},
- {re:/hippo|ฮิปโป/i,short:'ฮิปโปน้อย',s2:'🐟 ปลาทู',icon:'🦛',n:'ฮิปโปน้อย',fx:'ปลาทูยักษ์ ตบกระเด็น',run:f=>{f.weap='fish'}},
- {re:/garland|มาลัย/i,short:'พวงมาลัย',s2:'🛡️ ประเจียด',icon:'💐',n:'พวงมาลัย',fx:'ประเจียดกันดาเมจทั้งยก',run:f=>{f.shield=9999}},
- {re:/finger ?heart|ฟิงเกอร์/i,short:'ฟิงเกอร์ฮาร์ท',s2:'+25 ดาเมจ',icon:'🫰',n:'ฟิงเกอร์ฮาร์ท',fx:'ดาเมจ +25',run:f=>addDmg(f,25)},
- {re:/tiktok|ติ๊กต๊อก/i,short:'TikTok',s2:'+5 ดาเมจ',icon:'🎵',n:'TikTok',fx:'ดาเมจ +5',run:f=>addDmg(f,5)},
- {re:/rose|rosa|กุหลาบ|โรซ่า/i,short:'กุหลาบ',s2:'+30 HP',icon:'🌹',n:'กุหลาบ',fx:'HP +30',run:f=>addMax(f,30)},
+ {hide:1,re:/universe|จักรวาล/i,short:'Universe',s2:'แชมป์จักรวาล',icon:'🪐',n:'TikTok Universe',fx:'แชมป์จักรวาล: ยักษ์+นวมหนาม+อมตะ 15 วิ',run:f=>{f.giant=1;f.weap='gold';f.crown=15;addMax(f,5000);banner('🌌 แชมป์จักรวาล!',f.nick+' กลายร่างเป็นยักษ์ทองคำ')}},
+ {hide:1,re:/whale|วาฬ/i,short:'ปลาวาฬ',s2:'ฟาดทั้งเวที',icon:'🐳',n:'ดำน้ำดูปลาวาฬ',fx:'วาฬยักษ์ฟาดเวที คนอื่นเลือดหาย 50%',run:f=>{S.whale={x:-300,by:f.nick,id:f.id};banner('🐋 วาฬถล่มเวที!','จาก '+f.nick);say(`ปลาวาฬของ ${clean(f.nick)} ถล่มเวทีแล้ว!`,3)}},
+ {hide:1,re:/galaxy|กาแล็กซี/i,short:'Galaxy',s2:'ร่างยักษ์',icon:'🌌',n:'Galaxy',fx:'ร่างยักษ์ +2000 HP',run:f=>{f.giant=1;addMax(f,2000)}},
+ {hide:1,re:/money ?gun|ปืน/i,short:'Money Gun',s2:'กระทะ',icon:'💸',n:'Money Gun',fx:'กระทะ ต่อยแล้วมึน',run:f=>{f.weap='pan'}},
+ {hide:1,re:/finger ?heart|ฟิงเกอร์/i,short:'ฟิงเกอร์ฮาร์ท',s2:'+25 ดาเมจ',icon:'🫰',n:'ฟิงเกอร์ฮาร์ท',fx:'ดาเมจ +25',run:f=>addDmg(f,25)},
+ {c:100,img:'bear',re:/หมี|bear/i,short:'หมีมีชคา',s2:'ยักษ์+นวมหนาม',icon:'🧸',n:'หมีมีชคา',fx:'ร่างยักษ์ + นวมหนาม + 2000 HP',run:f=>{f.giant=1;f.weap='gold';addMax(f,2000)}},
+ {c:100,img:'hands',re:/hand ?hearts|อุ้มหัวใจ|มืออุ้ม/i,short:'มืออุ้มหัวใจ',s2:'+3000 HP',icon:'🫶',n:'มืออุ้มหัวใจ',fx:'HP +3000',run:f=>addMax(f,3000)},
+ {c:30,img:'donut',re:/doughnut|donut|โดนัท/i,short:'โดนัท',s2:'+1000 HP',icon:'🍩',n:'โดนัท',fx:'HP +1000',run:f=>addMax(f,1000)},
+ {c:20,img:'perfume',re:/perfume|น้ำหอม/i,short:'น้ำหอม',s2:'กระทะ',icon:'🍳',n:'น้ำหอม',fx:'กระทะ ต่อยแล้วมึน',run:f=>{f.weap='pan'}},
+ {c:15,img:'garland',re:/garland|มาลัย/i,short:'พวงมาลัย',s2:'ประเจียด',icon:'💐',n:'พวงมาลัย',fx:'ประเจียดกันดาเมจครึ่งหนึ่งทั้งยก',run:f=>{f.shield=9999}},
+ {c:15,img:'hippo',re:/hippo|ฮิปโป|หมูเด้ง|moo ?deng/i,short:'หมูเด้ง',s2:'+500 HP',icon:'🦛',n:'หมูเด้ง',fx:'HP +500',run:f=>addMax(f,500)},
+ {c:10,img:'dino',re:/dino|ไดโนเสาร์/i,short:'ไดโนเสาร์จิ๋ว',s2:'ร่างยักษ์',icon:'🦖',n:'ไดโนเสาร์จิ๋ว',fx:'ร่างยักษ์ +200 HP',run:f=>{f.giant=1;addMax(f,200)}},
+ {c:10,img:'pk',re:/หมัดฮึบ|\bpk\b|punch/i,short:'หมัดฮึบ PK',s2:'นวมหนาม',icon:'🥊',n:'หมัดฮึบ PK',fx:'นวมหนาม ดาเมจ x2',run:f=>{f.weap='gold'}},
+ {c:10,img:'rosa',re:/rosa|โรซ่า/i,short:'โรซ่า',s2:'+300 HP',icon:'🌹',n:'โรซ่า',fx:'HP +300',run:f=>addMax(f,300)},
+ {c:1,img:'gg',re:/^\s*gg\s*$/i,short:'GG',s2:'+5 ดาเมจ',icon:'🎮',n:'GG',fx:'ดาเมจ +5',run:f=>addDmg(f,5)},
+ {c:1,img:'icecream',re:/ice ?cream|ไอศกรีม|ไอติม/i,short:'ไอศกรีม',s2:'+30 HP',icon:'🍦',n:'ไอศกรีม',fx:'HP +30',run:f=>addMax(f,30)},
+ {c:1,img:'tiktok',re:/^\s*tiktok\s*$|^ติ๊กต๊อก$/i,short:'TikTok',s2:'+5 ดาเมจ',icon:'🎵',n:'TikTok',fx:'ดาเมจ +5',run:f=>addDmg(f,5)},
+ {c:1,img:'rose',re:/^\s*rose\s*$|กุหลาบ/i,short:'กุหลาบ',s2:'+30 HP',icon:'🌹',n:'กุหลาบ',fx:'HP +30',run:f=>addMax(f,30)},
 ];
+GIFTS.forEach(g=>{if(g.img){g.src='assets/gifts/g_'+g.img+'.png';g.im=new Image();g.im.src=g.src}});
 let GIMG={};try{GIMG=JSON.parse(localStorage.getItem('box_gimg')||'{}')}catch(e){}
 const gimgSrc=u=>viaServer?'/av?u='+encodeURIComponent(u):u;
-function renderGStrip(){const cards=GIFTS.slice().reverse().map(g=>`<div class="card"><div class="ic">${GIMG[g.short]?`<img src="${esc(gimgSrc(GIMG[g.short]))}" alt="">`:g.icon}</div><b>${g.short}</b><small>${g.s2.replace(/^[^+ก-๙A-Za-z0-9]+\s*/,'')}</small></div>`).join('');$('grail').innerHTML=cards+cards}
+function renderGStrip(){const cards=GIFTS.filter(g=>!g.hide).sort((a,b)=>a.c-b.c).map(g=>`<div class="card"><span class="cn">🪙${g.c}</span><div class="ic">${g.src?`<img src="${g.src}" alt="">`:GIMG[g.short]?`<img src="${esc(gimgSrc(GIMG[g.short]))}" alt="">`:g.icon}</div><b>${g.short}</b><small>${g.s2}</small></div>`).join('');$('grail').innerHTML=cards+cards}
 setTimeout(renderGStrip,0);
 $('gl').innerHTML=GIFTS.slice().reverse().map(g=>`<div class="m"><i>${g.icon}</i><span>${g.short}</span><small>${g.s2}</small></div>`).join('');
 function addMax(f,n){f.max+=n;f.hp=Math.min(f.max,f.hp+n)}
@@ -172,7 +181,7 @@ function handle(e){if(e&&e._sim!==1)dbg(e);const id=e.user||e.nick,nick=String(e
  if(e.type==='gift'){if(S.phase!=='lobby'){const on=S.f.find(x=>x.id===id&&!x.ko);if(!on)fighter(id,nick,e.avatar);if(on){const [x,y]=toXY(on.u,on.v);txt(x,y-140*scl(on.v,on.u),'🔒 ช่วงชก บัฟไม่ได้','#aaa',18)}feed(`🎁 ${nick} ส่ง ${e.giftName||'ของขวัญ'} (ช่วงชก ยังไม่มีผล)`);return}
   const f=fighter(id,nick,e.avatar)||S.f.find(x=>x.id===id);if(!f)return;const g=GIFTS.find(x=>x.re.test(e.giftName||''));const n=Math.min(10,Math.max(1,e.count||1));for(let k=0;k<n;k++){if(g)g.run(f);else giftFallback(f,e.diamonds||1)}const hpTxt=` (HP ${Math.round(f.hp)}/${f.max} • ดาเมจ ${atk(f)})`;
   const [x,y]=toXY(f.u,f.v);burst(x,y-80,30,['#ffd36b','#fff','#ff9b2f']);
-  if(e.giftImg){if(g&&GIMG[g.short]!==e.giftImg){GIMG[g.short]=e.giftImg;try{localStorage.setItem('box_gimg',JSON.stringify(GIMG))}catch(_){}renderGStrip()}const im=mkImg(e.giftImg);S.parts.push({type:'i',img:im,x,y:y-175*scl(f.v,f.u),vy:-40,life:1.8,max:1.8})}txt(x,y-150*scl(f.v,f.u),(g?g.icon+' '+g.n:'🎁')+(n>1?' x'+n:'')+'!','#ffd36b',28);say(`${clean(nick)} ได้${g?g.s2.replace(/^[^ก-๙A-Za-z]+/,''):'พลังพิเศษ'}!`,2);feed(`🎁 ${nick}: ${g?g.fx:'HP +'+30*n}${n>1&&g?' x'+n:''}${hpTxt}`)}}
+  {const im=g&&g.im?g.im:e.giftImg?mkImg(e.giftImg):null;if(im)S.parts.push({type:'i',img:im,x,y:y-175*scl(f.v,f.u),vy:-40,life:1.8,max:1.8})}txt(x,y-150*scl(f.v,f.u),(g?g.icon+' '+g.n:'🎁')+(n>1?' x'+n:'')+'!','#ffd36b',28);say(`${clean(nick)} ได้${g?g.s2.replace(/^[^ก-๙A-Za-z]+/,''):'พลังพิเศษ'}!`,2);feed(`🎁 ${nick}: ${g?g.fx:'HP +'+30*n}${n>1&&g?' x'+n:''}${hpTxt}`)}}
 /* ---------- fighter drawing ---------- */
 function avDraw(f,x,y,r){ctx.save();ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.clip();let h=0;for(const c of f.nick)h=(h*31+c.charCodeAt(0))>>>0;ctx.fillStyle=`hsl(${h%360},60%,55%)`;ctx.fillRect(x-r,y-r,2*r,2*r);
  if(f.img&&f.img.complete&&f.img.naturalWidth)ctx.drawImage(f.img,x-r,y-r,2*r,2*r);else{ctx.fillStyle='#fff';ctx.font='600 15px Mitr, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText([...f.nick][0]||'?',x,y+1)}ctx.restore();
@@ -384,13 +393,13 @@ const NM=['น้องฝน','Beam','ป้าแดง','ลุงดู่',
 document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{const k=b.dataset.s,live=S.f.filter(f=>!f.ko),r=live.length?pick(live):null;
  if(k==='join5')for(let i=0;i<5;i++){const n=NM[ni++%NM.length]+(ni>NM.length?ni:'');handle({type:'chat',user:'u'+ni,nick:n,comment:'ลง'})}
  if(!r)return;if(k==='heal')handle({type:'chat',user:r.id,nick:r.nick,comment:'hp'});if(k==='pow')handle({type:'chat',user:r.id,nick:r.nick,comment:'ตี'});
- const G={rose:['Rose',1],gold:['Hand Hearts',100],pan:['Money Gun',500],giant:['TikTok Universe',44999],whale:['Whale diving',2150]}[k];if(G)handle({type:'gift',user:r.id,nick:r.nick,giftName:G[0],diamonds:G[1],count:1})});
+ const G={rose:['Rose',1],gold:['หมัดฮึบ PK',10],pan:['น้ำหอม',20],giant:['หมีมีชคา',100],whale:['Whale diving',2150]}[k];if(G)handle({type:'gift',user:r.id,nick:r.nick,giftName:G[0],diamonds:G[1],count:1})});
 </script>
 <script>
 function camLbl(){if(window.G3)$('bCam').textContent='📷 ซูมอัตโนมัติ: '+(G3.auto?'เปิด':'ปิด')}
 addEventListener('g3ready',camLbl);
 $('bCam').onclick=()=>{if(window.G3){G3.setAuto(!G3.auto);camLbl()}};$('bCamR').onclick=()=>{window.G3&&G3.resetCam()};
 </script>
-<script type="module" src="assets/boxing3d.js"></script>
+<script type="module" src="assets/boxing3d.js?v=1794879884"></script>
 </body>
 </html>

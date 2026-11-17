@@ -13,7 +13,7 @@ const PORT = process.env.PORT || 3000;
 
 const app = express();
 app.use(express.static(path.join(__dirname, 'public')));
-app.use('/assets', express.static(path.join(__dirname, 'assets'), { maxAge: '7d' }));
+app.use('/assets', express.static(path.join(__dirname, 'assets'), { maxAge: '7d', setHeaders: (res, p) => { if (/\.(js|html)$/.test(p)) res.setHeader('Cache-Control', 'no-cache'); } }));
 // รองรับกรณีอัปโหลดไฟล์ไว้ระดับเดียวกัน (ไม่มีโฟลเดอร์ public)
 app.get('/', (_req, res) => {
   const inPublic = path.join(__dirname, 'public', 'index.html');
