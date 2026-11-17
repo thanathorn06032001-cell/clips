@@ -85,7 +85,7 @@ body.live #gear{display:none}
 <button id="gear">⚙️</button><button id="fs" style="position:fixed;right:6px;top:6px;z-index:10;height:38px;padding:0 12px;border-radius:10px;border:1px solid rgba(255,207,58,.6);background:rgba(0,0,0,.5);color:#fff;font:inherit;font-size:15px;opacity:.75">⛶ เต็มจอ</button>
 <div id="sim" class="hide">
  <div class="row"><b style="color:#ffd36b">🎛️ ผู้จัด</b><button id="bGo">🔔 เริ่มชก</button><button id="bAuto">โหมด: นับถอยหลัง</button><button id="bLob">รอ 60 วิ</button><button id="bHide">🙈 ซ่อนทั้งหมด (โหมดไลฟ์)</button></div>
- <div class="row"><button id="mode">คำพากย์: ปลอดภัย</button><button id="bSong">🎶 เพลง: ไฟล์</button><button id="bSpd">⏩ ตอนชก x1.5</button><button id="bMu">🎵 เพลง: เปิด</button><button id="bMv">ความดัง 60%</button><button id="bCam">📷 ซูมอัตโนมัติ: เปิด</button><button id="bCamR">🎥 รีเซ็ตกล้อง</button><button id="bVoice">🔊 ทดสอบเสียง</button></div>
+ <div class="row"><button id="mode">คำพากย์: ปลอดภัย</button><button id="bSong">🎶 เพลง: ไฟล์</button><button id="bSpd">⏩ ตอนชก x1.5</button><button id="bMu">🎵 เพลง: เปิด</button><button id="bMv">ความดัง 60%</button><button id="bCam">📷 ซูมอัตโนมัติ: เปิด</button><button id="bCamR">🎥 รีเซ็ตกล้อง</button><button id="bVo">🎙️ เสียงพากย์: ElevenLabs</button><button id="bVoice">🔊 ทดสอบเสียง</button></div>
  <div class="st" id="vst">🔊 กำลังเช็กเสียง…</div>
  <div class="row"><input id="ttUser" placeholder="ชื่อ TikTok"><button id="bConn">เชื่อมต่อ</button></div>
  <div class="st" id="wst">โหมดทดสอบ</div>
@@ -138,7 +138,7 @@ let bannerT;function banner(t,p,ms=3500){$('bnT').textContent=t;$('bnP').textCon
 /* ---------- gifts ---------- */
 const GIFTS=[
  {hide:1,re:/universe|จักรวาล/i,short:'Universe',s2:'แชมป์จักรวาล',icon:'🪐',n:'TikTok Universe',fx:'แชมป์จักรวาล: ยักษ์+นวมหนาม+อมตะ 15 วิ',run:f=>{f.giant=1;f.weap='gold';f.crown=15;addMax(f,5000);banner('🌌 แชมป์จักรวาล!',f.nick+' กลายร่างเป็นยักษ์ทองคำ')}},
- {hide:1,re:/whale|วาฬ/i,short:'ปลาวาฬ',s2:'ฟาดทั้งเวที',icon:'🐳',n:'ดำน้ำดูปลาวาฬ',fx:'วาฬยักษ์ฟาดเวที คนอื่นเลือดหาย 50%',run:f=>{S.whale={x:-300,by:f.nick,id:f.id};banner('🐋 วาฬถล่มเวที!','จาก '+f.nick);say(`ปลาวาฬของ ${clean(f.nick)} ถล่มเวทีแล้ว!`,3)}},
+ {hide:1,re:/whale|วาฬ/i,short:'ปลาวาฬ',s2:'ฟาดทั้งเวที',icon:'🐳',n:'ดำน้ำดูปลาวาฬ',fx:'วาฬยักษ์ฟาดเวที คนอื่นเลือดหาย 50%',run:f=>{S.whale={x:-300,by:f.nick,id:f.id};banner('🐋 วาฬถล่มเวที!','จาก '+f.nick);sayK('whale',`ปลาวาฬของ ${clean(f.nick)} ถล่มเวทีแล้ว!`,3)}},
  {hide:1,re:/galaxy|กาแล็กซี/i,short:'Galaxy',s2:'ร่างยักษ์',icon:'🌌',n:'Galaxy',fx:'ร่างยักษ์ +2000 HP',run:f=>{f.giant=1;addMax(f,2000)}},
  {hide:1,re:/money ?gun|ปืน/i,short:'Money Gun',s2:'กระทะ',icon:'💸',n:'Money Gun',fx:'กระทะ ต่อยแล้วมึน',run:f=>{f.weap='pan'}},
  {hide:1,re:/finger ?heart|ฟิงเกอร์/i,short:'ฟิงเกอร์ฮาร์ท',s2:'+25 ดาเมจ',icon:'🫰',n:'ฟิงเกอร์ฮาร์ท',fx:'ดาเมจ +25',run:f=>addDmg(f,25)},
@@ -170,7 +170,7 @@ const CD={};function cool(k,s){const n=Date.now();if(CD[k]&&n-CD[k]<s*1000)retur
 let dbgN=0,dbgL=[];function dbg(e){dbgN++;if(e.type==='like')return;dbgL.unshift((e.type==='chat'?'💬 ':e.type==='gift'?'🎁 ':'• ')+(e.nick||e.user||'?')+': '+(e.comment||e.giftName||e.type));dbgL.length=Math.min(dbgL.length,4);const d=document.getElementById('dbg');if(d)d.textContent='📨 ได้รับ '+dbgN+' รายการ\n'+dbgL.join('\n')}
 function handle(e){if(e&&e._sim!==1)dbg(e);const id=e.user||e.nick,nick=String(e.nick||'ผู้ชม').slice(0,14);
  if(e.type==='chat'){const t=String(e.comment||'');
-  const tc=t.replace(/[\u200b-\u200f\ufeff\s.!~,]+/g,' ').trim();if(/^(ลง|ลงๆ+|ลงค่ะ|ลงครับ|ขึ้นเวที|เข้า|join|1)( |$)/i.test(tc)||/ลงเวที|ลงด้วย/.test(tc)){const f=fighter(id,nick,e.avatar);if(f)txt(...toXY(f.tu,f.v),'ขึ้นเวที!','#fff');return}
+  const tc=t.replace(/[\u200b-\u200f\ufeff\s.!~,]+/g,' ').trim();if(/^(ลง|ลงๆ+|ลงค่ะ|ลงครับ|ขึ้นเวที|เข้า|join|1)( |$)/i.test(tc)||/ลงเวที|ลงด้วย/.test(tc)){const f=fighter(id,nick,e.avatar);if(f){txt(...toXY(f.tu,f.v),'ขึ้นเวที!','#fff');if(cool('joinvo',7))vo('join',0)}return}
   const f=S.f.find(x=>x.id===id&&!x.ko);if(!f)return;const [x,y]=toXY(f.u,f.v);
   if(S.phase!=='lobby'){if(/^\s*(hp|เลือด|ฮีล|heal|ดาเมจ|damage|dmg|ตี)/i.test(t)&&cool(id+'lk',8))txt(x,y-130*scl(f.v,f.u),'🔒 ชกอยู่ บัฟไม่ได้','#aaa',18);return}
   if(/^\s*(hp|เอชพี|เลือด|ฮีล|heal)/i.test(t)&&cool(id+'h',1)){addMax(f,10);txt(x+rnd(-10,10),y-130*scl(f.v,f.u),'+10 HP','#5dff7a')}
@@ -181,7 +181,7 @@ function handle(e){if(e&&e._sim!==1)dbg(e);const id=e.user||e.nick,nick=String(e
  if(e.type==='gift'){if(S.phase!=='lobby'){const on=S.f.find(x=>x.id===id&&!x.ko);if(!on)fighter(id,nick,e.avatar);if(on){const [x,y]=toXY(on.u,on.v);txt(x,y-140*scl(on.v,on.u),'🔒 ช่วงชก บัฟไม่ได้','#aaa',18)}feed(`🎁 ${nick} ส่ง ${e.giftName||'ของขวัญ'} (ช่วงชก ยังไม่มีผล)`);return}
   const f=fighter(id,nick,e.avatar)||S.f.find(x=>x.id===id);if(!f)return;const g=GIFTS.find(x=>x.re.test(e.giftName||''));const n=Math.min(10,Math.max(1,e.count||1));for(let k=0;k<n;k++){if(g)g.run(f);else giftFallback(f,e.diamonds||1)}const hpTxt=` (HP ${Math.round(f.hp)}/${f.max} • ดาเมจ ${atk(f)})`;
   const [x,y]=toXY(f.u,f.v);burst(x,y-80,30,['#ffd36b','#fff','#ff9b2f']);
-  {const im=g&&g.im?g.im:e.giftImg?mkImg(e.giftImg):null;if(im)S.parts.push({type:'i',img:im,x,y:y-175*scl(f.v,f.u),vy:-40,life:1.8,max:1.8})}txt(x,y-150*scl(f.v,f.u),(g?g.icon+' '+g.n:'🎁')+(n>1?' x'+n:'')+'!','#ffd36b',28);say(`${clean(nick)} ได้${g?g.s2.replace(/^[^ก-๙A-Za-z]+/,''):'พลังพิเศษ'}!`,2);feed(`🎁 ${nick}: ${g?g.fx:'HP +'+30*n}${n>1&&g?' x'+n:''}${hpTxt}`)}}
+  {const im=g&&g.im?g.im:e.giftImg?mkImg(e.giftImg):null;if(im)S.parts.push({type:'i',img:im,x,y:y-175*scl(f.v,f.u),vy:-40,life:1.8,max:1.8})}txt(x,y-150*scl(f.v,f.u),(g?g.icon+' '+g.n:'🎁')+(n>1?' x'+n:'')+'!','#ffd36b',28);if(cool('gv',2.5)){const fxk=!g?'thx':/ยักษ์/.test(g.s2)?'giant':/นวมหนาม/.test(g.s2)?'spike':/กระทะ/.test(g.s2)?'pan':/ประเจียด/.test(g.s2)?'shield':'thx';sayK(fxk,`${clean(nick)} ได้${g?g.s2.replace(/^[^ก-๙A-Za-z]+/,''):'พลังพิเศษ'}!`,2)}feed(`🎁 ${nick}: ${g?g.fx:'HP +'+30*n}${n>1&&g?' x'+n:''}${hpTxt}`)}}
 /* ---------- fighter drawing ---------- */
 function avDraw(f,x,y,r){ctx.save();ctx.beginPath();ctx.arc(x,y,r,0,7);ctx.clip();let h=0;for(const c of f.nick)h=(h*31+c.charCodeAt(0))>>>0;ctx.fillStyle=`hsl(${h%360},60%,55%)`;ctx.fillRect(x-r,y-r,2*r,2*r);
  if(f.img&&f.img.complete&&f.img.naturalWidth)ctx.drawImage(f.img,x-r,y-r,2*r,2*r);else{ctx.fillStyle='#fff';ctx.font='600 15px Mitr, sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText([...f.nick][0]||'?',x,y+1)}ctx.restore();
@@ -277,7 +277,7 @@ function goFull(){const d=document.documentElement;try{const r=(d.requestFullscr
 function fsUI(){const on=!!(document.fullscreenElement||document.webkitFullscreenElement);$('fs').style.display=on?'none':'block';setTimeout(fit,100)}
 document.addEventListener('fullscreenchange',fsUI);document.addEventListener('webkitfullscreenchange',fsUI);
 $('fs').onclick=goFull;
-$('bStart').onclick=()=>{goFull();$('start').remove();au();muInit();try{speechSynthesis.cancel()}catch(e){}setTimeout(voiceStatus,300);say('ยินดีต้อนรับสู่สังเวียนไลฟ์! พิมพ์ ลง เพื่อขึ้นเวทีได้เลย!',3)};
+$('bStart').onclick=()=>{goFull();$('start').remove();au();muInit();try{speechSynthesis.cancel()}catch(e){}setTimeout(voiceStatus,300);voLoad();sayK('welcome','ยินดีต้อนรับสู่สังเวียนไลฟ์! พิมพ์ ลง เพื่อขึ้นเวทีได้เลย!',3)};
 $('mode').onclick=()=>{V.hard=!V.hard;$('mode').textContent='คำพากย์: '+(V.hard?'ดุดัน (สังหาร)':'ปลอดภัย')};
 /* ---------- roster (all fighters) ---------- */
 const atk=f=>Math.round((8.5+(f.dmgB||0))*(1+f.pow)*(f.weap?WEAP[f.weap].mul:1)*(f.giant?1.6:1));
@@ -296,6 +296,16 @@ function renderRoster(){const now=S.t,list=S.f.slice().sort((a,b)=>(a.ko-b.ko)||
 setInterval(renderRoster,250);
 /* ---------- commentary voice ---------- */
 const V={on:true,hard:false,q:[],busy:false,voice:null,t:null};
+/* ---------- ElevenLabs voice pack ---------- */
+const VO={keys:["cd10", "cd30", "fight1", "fight2", "fight3", "giant", "heart", "hype1", "hype2", "hype3", "hype4", "hype5", "join1", "join2", "join3", "ko1", "ko2", "ko3", "ko4", "ko5", "ko6", "last2", "lobby1", "lobby2", "n1", "n2", "n3", "pan", "roundend", "shield", "spike", "streak1", "streak2", "test", "thx1", "thx2", "thx3", "thx4", "timeup", "wait", "welcome", "whale", "win1", "win2"],buf:{},ready:false,loading:false,on:true,src:null,cur:-1,q:[],last:{}};try{VO.on=localStorage.getItem('box_vo')!=='0'}catch(e){}
+function voLoad(){const c=au();if(!c||VO.loading)return;VO.loading=true;let n=0;VO.out=c.createGain();VO.out.gain.value=1.15;VO.out.connect(c.destination);
+ VO.keys.forEach(k=>fetch('assets/vo/'+k+'.mp3').then(r=>r.arrayBuffer()).then(b=>c.decodeAudioData(b)).then(d=>{VO.buf[k]=d;if(++n>=8)VO.ready=true}).catch(()=>{}))}
+function voPick(p){const L=VO.keys.filter(k=>k===p||(k.startsWith(p)&&/^\d+$/.test(k.slice(p.length)))).filter(k=>VO.buf[k]);if(!L.length)return null;const fresh=L.filter(k=>k!==VO.last[p]);const k=pick(fresh.length?fresh:L);VO.last[p]=k;return k}
+function voPlay(){if(VO.src||!VO.q.length){if(!VO.src&&!V.busy)muDuck(false);return}const it=VO.q.shift();const b=VO.buf[it.k];if(!b)return voPlay();const c=AC,n=c.createBufferSource();n.buffer=b;n.connect(VO.out);VO.src=n;VO.cur=it.prio;muDuck(true);n.onended=()=>{VO.src=null;VO.cur=-1;setTimeout(voPlay,120)};n.start()}
+function vo(p,prio=1){if(!V.on)return false;if(!(VO.on&&VO.ready))return false;const k=voPick(p);if(!k)return false;
+ if(VO.src&&prio>=3&&VO.cur<3){try{VO.src.onended=null;VO.src.stop()}catch(e){}VO.src=null;VO.q=[]}
+ if(VO.src&&prio<=0)return true;VO.q.push({k,prio});VO.q.sort((a,b)=>b.prio-a.prio);if(VO.q.length>2)VO.q.length=2;voPlay();return true}
+function sayK(p,text,prio,tr=0){if(V.on&&VO.on&&!VO.ready&&tr<8){voLoad();setTimeout(()=>sayK(p,text,prio,tr+1),500);return}if(!vo(p,prio))say(text,prio)}
 function pickVoice(){if(!('speechSynthesis' in window))return;const vs=speechSynthesis.getVoices();V.voice=vs.find(v=>/^th/i.test(v.lang)&&/google/i.test(v.name))||vs.find(v=>/^th/i.test(v.lang))||null}
 if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice}
 const clean=n=>String(n).replace(/[\u{1F000}-\u{1FFFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu,'').trim()||'นักมวย';
@@ -305,8 +315,8 @@ function next(){if(V.busy||!V.q.length){if(!V.busy)muDuck(false);return}const it
 const KO_SAFE=['{a} น็อก {b}!','{a} จัดการ {b} เรียบร้อย!','{b} ร่วงแล้ว ฝีมือ {a}!','{a} ส่ง {b} กลับบ้าน!','{a} ปิดฉาก {b}!','หมัดเด็ด! {a} ล้ม {b}!'];
 const KO_HARD=['{a} สังหาร {b}!','{a} สังหาร {b} อย่างโหด!','{b} ถูก {a} สังหารแล้ว!'];
 function koVoice(a,b){a.streak=(a.streak||0)+1;const A=clean(a.nick),B=clean(b.nick);
- if(a.streak>=3&&a.streak%3===0){say(`${A} ไร้เทียมทาน! ล้มไปแล้ว ${a.streak} คนติด!`,2);return}
- const L=V.hard?KO_HARD.concat(KO_SAFE.slice(0,2)):KO_SAFE;say(pick(L).replace('{a}',A).replace('{b}',B),1)}
+ if(a.streak>=3&&a.streak%3===0){sayK('streak',`${A} ไร้เทียมทาน! ล้มไปแล้ว ${a.streak} คนติด!`,2);return}
+ const L=V.hard?KO_HARD.concat(KO_SAFE.slice(0,2)):KO_SAFE;const kt=pick(L).replace('{a}',A).replace('{b}',B);sayK('ko',kt,1)}
 /* ---------- Muay Thai music (pi java + klong khaek + ching) ---------- */
 const MU={mode:'song',fast:1.5,on:true,vol:.6,node:null,step:0,bar:0,next:0,timer:null,pi:null,last:-1};try{MU.mode=localStorage.getItem('box_mode')||'song';MU.fast=parseFloat(localStorage.getItem('box_fast'))||1.5}catch(e){}
 try{MU.on=localStorage.getItem('box_mu')!=='0';const v=parseFloat(localStorage.getItem('box_mv'));if(v>=0)MU.vol=v}catch(e){}
@@ -350,16 +360,16 @@ function bell(){const c=au();if(!c)return;for(let k=0;k<3;k++){const t=c.current
 function txtQ(nick){feed(`⏳ ${nick} รอเข้ายกถัดไป`)}
 const fmt=t=>{t=Math.max(0,Math.ceil(t));return Math.floor(t/60)+':'+String(t%60).padStart(2,'0')};
 function phaseTick(dt){const alive=S.f.filter(f=>!f.ko);
- if(S.phase==='lobby'){if(CFG.auto){S.timer-=dt;const sec=Math.ceil(S.timer);if(sec!==S.lastSec){S.lastSec=sec;if(sec===30||sec===10)say(`อีก ${sec} วินาทีเริ่มชก! พิมพ์ ลง เลย!`,2);if(sec<=3&&sec>=1)say(String(sec),3)}
-   if(S.timer<=0){if(alive.length>=2)startFight();else{S.timer=15;say('รอนักมวยเพิ่มอีกนิด! พิมพ์ ลง เพื่อขึ้นเวที!',2)}}}}
- else if(S.phase==='fight'){S.timer-=dt;if(alive.length<=1&&S.f.length>=1)endRound(alive[0],false);else if(S.timer<=0){alive.sort((a,b)=>b.hp/b.max-a.hp/a.max);endRound(alive[0],true)}}}
+ if(S.phase==='lobby'){if(CFG.auto){S.timer-=dt;const sec=Math.ceil(S.timer);if(sec!==S.lastSec){S.lastSec=sec;if(sec===30||sec===10)sayK('cd'+sec,`อีก ${sec} วินาทีเริ่มชก! พิมพ์ ลง เลย!`,2);if(sec<=3&&sec>=1)sayK('n'+sec,String(sec),3)}
+   if(S.timer<=0){if(alive.length>=2)startFight();else{S.timer=15;sayK('wait','รอนักมวยเพิ่มอีกนิด! พิมพ์ ลง เพื่อขึ้นเวที!',2)}}}}
+ else if(S.phase==='fight'){S.timer-=dt;if(alive.length===2&&!S.l2&&S.f.filter(f=>!f.enter).length>2){S.l2=1;vo('last2',2)}if(S.t>(S.hypeT||0)){S.hypeT=S.t+rnd(9,15);if(alive.length>=2)vo('hype',0)}if(alive.length<=1&&S.f.length>=1)endRound(alive[0],false);else if(S.timer<=0){alive.sort((a,b)=>b.hp/b.max-a.hp/a.max);endRound(alive[0],true)}}}
 function startFight(){if(S.phase!=='lobby')return;if(S.f.filter(f=>!f.ko).length<2){banner('ยังเริ่มไม่ได้','ต้องมีนักมวยบนเวทีอย่างน้อย 2 คน',2500);return}
- S.phase='fight';S.timer=CFG.fight;for(const f of S.f)if(f.crown>0)f.crown=15;bell();say(`ยกที่ ${S.round}! ชก! เคาะใจรัวๆ ฟื้นเลือดให้นักมวยของคุณ!`,3);banner(`🔔 ยกที่ ${S.round}`,'ชก! ❤️ เคาะใจ = ฟื้นเลือด',2200)}
+ S.phase='fight';S.timer=CFG.fight;for(const f of S.f)if(f.crown>0)f.crown=15;bell();S.l2=0;S.hypeT=S.t+7;if(vo('fight',3))vo('heart',2);else say(`ยกที่ ${S.round}! ชก! เคาะใจรัวๆ ฟื้นเลือดให้นักมวยของคุณ!`,3);banner(`🔔 ยกที่ ${S.round}`,'ชก! ❤️ เคาะใจ = ฟื้นเลือด',2200)}
 function endRound(w,byTime){if(S.phase!=='fight')return;S.phase='end';
- if(w){w.isChamp=1;S.champ=w.id;banner(byTime?'⏰ หมดเวลา!':'🏆 แชมป์ยกที่ '+S.round,w.nick+(byTime?' เลือดเหลือมากสุด ชนะ!':' ยืนหนึ่งบนสังเวียน!'),4500);say(byTime?`หมดเวลา! ผู้ชนะคือ ${clean(w.nick)}!`:`แชมป์ยกนี้คือ ${clean(w.nick)}! ยืนหนึ่งบนสังเวียน!`,3)}
+ if(w){w.isChamp=1;S.champ=w.id;banner(byTime?'⏰ หมดเวลา!':'🏆 แชมป์ยกที่ '+S.round,w.nick+(byTime?' เลือดเหลือมากสุด ชนะ!':' ยืนหนึ่งบนสังเวียน!'),4500);sayK(byTime?'timeup':'win',byTime?`หมดเวลา! ผู้ชนะคือ ${clean(w.nick)}!`:`แชมป์ยกนี้คือ ${clean(w.nick)}! ยืนหนึ่งบนสังเวียน!`,3)}
  setTimeout(newLobby,5000)}
 function newLobby(){S.round++;const c=S.f.find(f=>f.id===S.champ&&!f.ko);S.f=[];if(c){Object.assign(c,{dmgB:0,hp:100,max:100,pow:0,powT:0,weap:null,giant:0,crown:0,shield:0,stun:0,streak:0,isChamp:1,enter:0});S.f.push(c)}
- S.phase='lobby';S.timer=CFG.lobby;S.lastSec=null;say(`เปิดรับนักมวยยกที่ ${S.round}! พิมพ์ ลง เพื่อขึ้นเวที!`,2)}
+ S.phase='lobby';S.timer=CFG.lobby;S.lastSec=null;sayK('lobby',`เปิดรับนักมวยยกที่ ${S.round}! พิมพ์ ลง เพื่อขึ้นเวที!`,2)}
 function uiTick(){$('htip').style.display=(S.phase==='fight'&&S.timer>CFG.fight-8)?'block':'none';const cd=$('cd');if(S.phase==='lobby'){cd.style.display='block';if(CFG.auto){$('cd1').textContent=`ยกที่ ${S.round} เริ่มชกใน`;$('cd2').textContent=fmt(S.timer)}else{$('cd1').textContent=`ยกที่ ${S.round}`;$('cd2').textContent='รอเริ่ม'}
   $('cd3').textContent='พิมพ์ "ลง" ขึ้นเวที • "hp" / "ดาเมจ" / ของขวัญ บัฟได้ก่อนระฆังเท่านั้น!';$('ph').textContent='⏳ ช่วงลงเวที'}
  else if(S.phase==='fight'){cd.style.display='none';$('ph').textContent='⏱ '+fmt(S.timer)}else{cd.style.display='none';$('ph').textContent='🏁 จบยก'}}
@@ -392,7 +402,8 @@ let taps=[];$('hot').addEventListener('pointerdown',()=>{const n=Date.now();taps
 function voiceStatus(){const el=$('vst');if(!('speechSynthesis' in window)){el.textContent='🔇 แอปนี้ไม่รองรับเสียงพูด — เปิดลิงก์ใน Chrome';return}pickVoice();const n=speechSynthesis.getVoices().length;
  el.textContent=V.voice?('🔊 เสียงพากย์พร้อม: '+V.voice.name):(n?'⚠️ ไม่พบเสียงภาษาไทย — ติดตั้ง Google Text-to-Speech (ไทย)':'⚠️ ยังไม่พบเสียง — กดทดสอบเสียงอีกครั้ง หรือเปิดใน Chrome')}
 setTimeout(voiceStatus,800);if('speechSynthesis' in window)speechSynthesis.addEventListener&&speechSynthesis.addEventListener('voiceschanged',voiceStatus);
-$('bVoice').onclick=()=>{au();muInit();try{speechSynthesis.cancel()}catch(e){}V.busy=false;V.q=[];say('ทดสอบเสียงพากย์ หนึ่ง สอง สาม ชก!',3);setTimeout(voiceStatus,300)};
+$('bVo').onclick=()=>{VO.on=!VO.on;try{localStorage.setItem('box_vo',VO.on?'1':'0')}catch(e){}voLoad();$('bVo').textContent='🎙️ เสียงพากย์: '+(VO.on?'ElevenLabs':'เสียงเครื่อง')};$('bVo').textContent='🎙️ เสียงพากย์: '+(VO.on?'ElevenLabs':'เสียงเครื่อง');
+$('bVoice').onclick=()=>{au();muInit();try{speechSynthesis.cancel()}catch(e){}V.busy=false;V.q=[];voLoad();sayK('test','ทดสอบเสียงพากย์ หนึ่ง สอง สาม ชก!',3);setTimeout(voiceStatus,300)};
 /* ---------- quick sim buttons ---------- */
 const NM=['น้องฝน','Beam','ป้าแดง','ลุงดู่','Aom','Plo','เจ๊หมวย','Nok','มะปราง','ต้นกล้า','แม่ค้า','Zin','ก้อย','บอย','ใบเตย','โอ๊ต','แจ็ค','มิว','เบล','ต้า','นัท','กิ๊ฟ','ปาล์ม','ฟ้า'];let ni=0;
 document.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{const k=b.dataset.s,live=S.f.filter(f=>!f.ko),r=live.length?pick(live):null;
