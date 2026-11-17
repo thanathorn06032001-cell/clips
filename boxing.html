@@ -61,7 +61,7 @@ body.live #gear{display:none}
  <div class="ov box" id="roster"><h3>🥊 นักมวยบนเวที <span class="pg" id="pg"></span></h3><div class="hd"><span>ชื่อ</span><span style="text-align:right">❤️ HP</span><span style="text-align:right">⚔️ ดาเมจ</span><span style="text-align:right">KO</span></div><div id="rl"></div></div>
  <div class="ov" id="feed"><div id="fl"></div></div>
  <div id="start" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:5"><button id="bStart" style="font:inherit;font-size:34px;padding:20px 38px;border-radius:20px;border:3px solid #ff9b2f;background:linear-gradient(#e8203a,#7a0c14);color:#fff">🥊 แตะเพื่อเริ่ม</button></div>
- <div class="ov box" id="cmd"><h3>⌨️ พิมพ์เพื่อเล่น</h3><b>ลง</b> = ขึ้นเวที (ไม่จำกัดคน)<br><b>hp</b> = +10 HP (ไม่จำกัด)<br><b>ดาเมจ</b> = +1 ดาเมจ (ไม่จำกัด)<br>❤️ เคาะใจ = ฟื้นเลือดตอนชก<br><span style="color:#ff9b2f">⚠️ บัฟ/ของขวัญ ได้เฉพาะช่วงเตรียมตัว</span></div>
+ <div class="ov box" id="cmd"><h3>⌨️ พิมพ์เพื่อเล่น</h3><b>ลง</b> = ขึ้นเวที (ไม่จำกัดคน)<br><b>hp</b> = +10 HP (ไม่จำกัด)<br><b>ดาเมจ</b> = +1 ดาเมจ (ไม่จำกัด)<br>❤️ เคาะใจ = +0.5 HP ตอนชก<br><span style="color:#ff9b2f">⚠️ บัฟ/ของขวัญ ได้เฉพาะช่วงเตรียมตัว</span></div>
  <div class="ov box" id="gift"><h3>🎁 ของขวัญ = ของเทพ</h3><div id="gl"></div></div>
  <div class="ov" id="banner"><div class="box"><h2 id="bnT"></h2><p id="bnP"></p></div></div>
  <div class="ov" id="cd"><div class="box"><div class="t1" id="cd1">เริ่มชกใน</div><div class="t2" id="cd2">1:00</div><div class="t3" id="cd3">พิมพ์ "ลง" เพื่อขึ้นเวที • พิมพ์ hp / ดาเมจ เพิ่มพลังได้เลย</div></div></div>
@@ -151,7 +151,7 @@ function handle(e){if(e&&e._sim!==1)dbg(e);const id=e.user||e.nick,nick=String(e
   if(/^\s*(ดาเมจ|ดาเมท|damage|dmg|ตี)/i.test(t)&&cool(id+'p',1)){addDmg(f,1);txt(x+rnd(-10,10),y-130*scl(f.v),'+1 ดาเมจ','#ff9b2f')}
 }
  if(e.type==='like'){const f=S.f.find(x=>x.id===id&&!x.ko);if(!f)return;if(S.phase!=='fight'){return}
-  const before=f.hp,add=Math.min(15,Math.max(2,Math.round((e.count||1)*1.5)));f.hp=Math.min(f.max,f.hp+add);const got=Math.round(f.hp-before);const [x,y]=toXY(f.u,f.v);
+  const before=f.hp,add=(e.count||1)*0.5;f.hp=Math.min(f.max,f.hp+add);const got=Math.round((f.hp-before)*10)/10;const [x,y]=toXY(f.u,f.v);
   if(got>0){txt(x+rnd(-12,12),y-118*scl(f.v),'❤️+'+got,'#ff7aa8',22);if(cool(id+'lf',6))feed(`❤️ ${nick} เคาะใจ ฟื้นเลือด +${got} (${Math.round(f.hp)}/${f.max})`)}else if(cool(id+'lm',6))txt(x,y-118*scl(f.v),'❤️ เลือดเต็มแล้ว','#ffb0c8',16)}
  if(e.type==='gift'){if(S.phase!=='lobby'){const on=S.f.find(x=>x.id===id&&!x.ko);if(!on)fighter(id,nick,e.avatar);if(on){const [x,y]=toXY(on.u,on.v);txt(x,y-140*scl(on.v),'🔒 ช่วงชก บัฟไม่ได้','#aaa',18)}feed(`🎁 ${nick} ส่ง ${e.giftName||'ของขวัญ'} (ช่วงชก ยังไม่มีผล)`);return}
   const f=fighter(id,nick,e.avatar)||S.f.find(x=>x.id===id);if(!f)return;const g=GIFTS.find(x=>x.re.test(e.giftName||''));const n=Math.min(10,Math.max(1,e.count||1));for(let k=0;k<n;k++){if(g)g.run(f);else giftFallback(f,e.diamonds||1)}const hpTxt=` (HP ${Math.round(f.hp)}/${f.max} • ดาเมจ ${atk(f)})`;
