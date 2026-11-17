@@ -14,7 +14,76 @@ function init() {
   R.outputColorSpace = THREE.SRGBColorSpace;
   const scene = new THREE.Scene();
   const cam = new THREE.PerspectiveCamera(30, W / H, 0.1, 300);
-  cam.position.set(0, 24, 27); cam.lookAt(0, 1.6, -0.5);
+  // ---------- camera rig: auto close-up + touch control ----------
+  const HOME = { yaw: 0, pitch: Math.atan2(22.4, 27.5), dist: Math.hypot(22.4, 27.5), tx: 0, ty: 1.6, tz: -0.5 };
+  const cur = { ...HOME };
+  let manual = null, lastTouch = 0, autoOn = true;
+  try { autoOn = localStorage.getItem('box_autocam') !== '0'; } catch (e) {}
+  function applyCam() {
+    const cp = Math.cos(cur.pitch);
+    cam.position.set(cur.tx + cur.dist * Math.sin(cur.yaw) * cp, cur.ty + cur.dist * Math.sin(cur.pitch), cur.tz + cur.dist * Math.cos(cur.yaw) * cp);
+    cam.lookAt(cur.tx, cur.ty, cur.tz); cam.updateMatrixWorld();
+  }
+  applyCam();
+  const hint = document.createElement('div');
+  hint.style.cssText = 'position:absolute;left:50%;top:430px;transform:translateX(-50%);z-index:3;padding:4px 14px;border-radius:14px;background:rgba(0,0,0,.6);border:1px solid #ffd36b;color:#fff;font:15px Mitr,sans-serif;display:none;pointer-events:none;white-space:nowrap';
+  document.getElementById('stage').appendChild(hint);
+  let closeMode = false;
+  function camTick(S, dt) {
+    const now = performance.now();
+    if (manual && now - lastTouch > 15000) manual = null;
+    let want = HOME;
+    if (manual) want = manual;
+    else if (autoOn) {
+      const alive = S.f.filter(f => !f.ko && !f.enter);
+      const recentKO = S.f.find(f => f.ko && S.t - f.koT < 1.6);
+      if (S.phase === 'fight' && alive.length === 2) {
+        const [a, b] = alive, [ax, az] = toW(a.u, a.v), [bx, bz] = toW(b.u, b.v);
+        const sep = Math.hypot(ax - bx, az - bz);
+        want = { yaw: .3, pitch: .38, dist: Math.min(22, 9 + sep * 1.3 + (a.giant || b.giant ? 3 : 0)), tx: (ax + bx) / 2, ty: .9, tz: (az + bz) / 2 };
+      } else if (S.phase === 'end' && recentKO) {
+        const [kx, kz] = toW(recentKO.u, recentKO.v);
+        want = { yaw: -.25, pitch: .45, dist: 10, tx: kx, ty: .6, tz: kz };
+      }
+    }
+    closeMode = want !== HOME && !manual;
+    const k = Math.min(1, dt * (manual ? 12 : 2.2));
+    let dy = want.yaw - cur.yaw; dy = Math.atan2(Math.sin(dy), Math.cos(dy)); cur.yaw += dy * k;
+    for (const key of ['pitch', 'dist', 'tx', 'ty', 'tz']) cur[key] += (want[key] - cur[key]) * k;
+    applyCam();
+    hint.style.display = manual ? 'block' : 'none';
+    if (manual) hint.textContent = '📷 กล้องมือ • แตะ 2 ครั้ง = กลับอัตโนมัติ';
+  }
+  // touch / mouse
+  const PT = new Map(); let pinch0 = null, lastTap = 0;
+  const host = document.getElementById('box') || document.body;
+  const startManual = () => { if (!manual) manual = { ...cur }; lastTouch = performance.now(); };
+  host.addEventListener('pointerdown', e => {
+    if (e.target.closest && e.target.closest('button,input,#sim')) return;
+    const n = performance.now();
+    if (n - lastTap < 320 && PT.size === 0) { manual = null; lastTap = 0; return; }
+    lastTap = n;
+    PT.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (PT.size === 2) { const [p1, p2] = [...PT.values()]; pinch0 = { d: Math.hypot(p1.x - p2.x, p1.y - p2.y), mx: (p1.x + p2.x) / 2, my: (p1.y + p2.y) / 2 }; }
+  });
+  host.addEventListener('pointermove', e => {
+    const p = PT.get(e.pointerId); if (!p) return;
+    const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
+    if (PT.size === 1) {
+      if (Math.abs(dx) + Math.abs(dy) < 1) return;
+      startManual(); manual.yaw -= dx * .006; manual.pitch = Math.max(.12, Math.min(1.35, manual.pitch + dy * .004));
+    } else if (PT.size === 2 && pinch0) {
+      const [p1, p2] = [...PT.values()], d = Math.hypot(p1.x - p2.x, p1.y - p2.y), mx = (p1.x + p2.x) / 2, my = (p1.y + p2.y) / 2;
+      startManual(); manual.dist = Math.max(5, Math.min(60, manual.dist * pinch0.d / Math.max(20, d)));
+      const s = manual.dist * .0018, cy = Math.cos(manual.yaw), sy = Math.sin(manual.yaw), pdx = mx - pinch0.mx, pdy = my - pinch0.my;
+      manual.tx = Math.max(-9, Math.min(9, manual.tx - (pdx * cy + pdy * sy) * s)); manual.tz = Math.max(-9, Math.min(9, manual.tz - (-pdx * sy + pdy * cy) * s));
+      pinch0 = { d, mx, my };
+    }
+  });
+  const up = e => { PT.delete(e.pointerId); if (PT.size < 2) pinch0 = null; };
+  host.addEventListener('pointerup', up); host.addEventListener('pointercancel', up);
+  host.addEventListener('wheel', e => { startManual(); manual.dist = Math.max(5, Math.min(60, manual.dist * (e.deltaY > 0 ? 1.1 : .9))); }, { passive: true });
+  host.style.touchAction = 'none';
 
   // ---------- helpers ----------
   const MATS = {};
@@ -160,12 +229,13 @@ function init() {
   const vA = new THREE.Vector3(), vB = new THREE.Vector3();
   function proj(x, y, z) { vA.set(x, y, z).project(cam); return [(vA.x + 1) / 2 * W, (1 - vA.y) / 2 * H]; }
   function toXY(u, v) { const [x, z] = toW(u, v); return proj(x, 0, z); }
-  function scl(v) { const [, z] = toW(.5, v); const a = proj(0, 0, z), b = proj(0, 1.62, z); return (a[1] - b[1]) / 122; }
+  function scl(v, u = .5) { const [x, z] = toW(u, v); const a = proj(x, 0, z), b = proj(x, 1.62, z); return Math.max(.2, (a[1] - b[1]) / 122); }
   const setArm = (arm, a, b) => { vB.subVectors(b, a); const len = vB.length(); arm.position.copy(a).addScaledVector(vB, .5); arm.quaternion.setFromUnitVectors(UP, vB.normalize()); arm.scale.set(.07, Math.max(.01, len / 3), .07); };
   const sh = new THREE.Vector3(), gl = new THREE.Vector3();
 
   function render(S, dt) {
     const t = S.t, fight = S.phase === 'fight';
+    camTick(S, dt);
     crowdTick(t, fight);
     bulbs.forEach((b, i) => { b.material.color.setHSL(((i * .13 + t * .3) % 1), 1, (i + Math.floor(t * 3)) % 3 ? .55 : .85); });
     beams[0].rotation.z = Math.sin(t * .6) * .35 - .25; beams[1].rotation.z = Math.sin(t * .6 + 2) * .35 + .25;
@@ -220,6 +290,6 @@ function init() {
     for (const [id, o] of objs) if (!seen.has(id)) { scene.remove(o.root); o.skin.dispose(); o.trunk.dispose(); o.shield.material.dispose(); o.glow.material.dispose(); objs.delete(id); }
     R.render(scene, cam);
   }
-  window.G3 = { toXY, scl, render, THREE };
+  window.G3 = { toXY, scl, render, THREE, setAuto(v) { autoOn = v; try { localStorage.setItem('box_autocam', v ? '1' : '0'); } catch (e) {} }, get auto() { return autoOn; }, resetCam() { manual = null; } };
   window.dispatchEvent(new Event('g3ready'));
 }
