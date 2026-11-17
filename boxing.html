@@ -85,7 +85,7 @@ body.live #gear{display:none}
 <button id="gear">⚙️</button><button id="fs" style="position:fixed;right:6px;top:6px;z-index:10;height:38px;padding:0 12px;border-radius:10px;border:1px solid rgba(255,207,58,.6);background:rgba(0,0,0,.5);color:#fff;font:inherit;font-size:15px;opacity:.75">⛶ เต็มจอ</button>
 <div id="sim" class="hide">
  <div class="row"><b style="color:#ffd36b">🎛️ ผู้จัด</b><button id="bGo">🔔 เริ่มชก</button><button id="bAuto">โหมด: นับถอยหลัง</button><button id="bLob">รอ 60 วิ</button><button id="bHide">🙈 ซ่อนทั้งหมด (โหมดไลฟ์)</button></div>
- <div class="row"><button id="mode">คำพากย์: ปลอดภัย</button><button id="bMu">🎵 เพลง: เปิด</button><button id="bMv">ความดัง 60%</button><button id="bCam">📷 ซูมอัตโนมัติ: เปิด</button><button id="bCamR">🎥 รีเซ็ตกล้อง</button><button id="bVoice">🔊 ทดสอบเสียง</button></div>
+ <div class="row"><button id="mode">คำพากย์: ปลอดภัย</button><button id="bSong">🎶 เพลง: ไฟล์</button><button id="bSpd">⏩ ตอนชก x1.5</button><button id="bMu">🎵 เพลง: เปิด</button><button id="bMv">ความดัง 60%</button><button id="bCam">📷 ซูมอัตโนมัติ: เปิด</button><button id="bCamR">🎥 รีเซ็ตกล้อง</button><button id="bVoice">🔊 ทดสอบเสียง</button></div>
  <div class="st" id="vst">🔊 กำลังเช็กเสียง…</div>
  <div class="row"><input id="ttUser" placeholder="ชื่อ TikTok"><button id="bConn">เชื่อมต่อ</button></div>
  <div class="st" id="wst">โหมดทดสอบ</div>
@@ -308,7 +308,7 @@ function koVoice(a,b){a.streak=(a.streak||0)+1;const A=clean(a.nick),B=clean(b.n
  if(a.streak>=3&&a.streak%3===0){say(`${A} ไร้เทียมทาน! ล้มไปแล้ว ${a.streak} คนติด!`,2);return}
  const L=V.hard?KO_HARD.concat(KO_SAFE.slice(0,2)):KO_SAFE;say(pick(L).replace('{a}',A).replace('{b}',B),1)}
 /* ---------- Muay Thai music (pi java + klong khaek + ching) ---------- */
-const MU={on:true,vol:.6,node:null,step:0,bar:0,next:0,timer:null,pi:null,last:-1};
+const MU={mode:'song',fast:1.5,on:true,vol:.6,node:null,step:0,bar:0,next:0,timer:null,pi:null,last:-1};try{MU.mode=localStorage.getItem('box_mode')||'song';MU.fast=parseFloat(localStorage.getItem('box_fast'))||1.5}catch(e){}
 try{MU.on=localStorage.getItem('box_mu')!=='0';const v=parseFloat(localStorage.getItem('box_mv'));if(v>=0)MU.vol=v}catch(e){}
 function muInit(){const c=au();if(!c||MU.node)return;MU.node=c.createGain();MU.duck=c.createGain();const comp=c.createDynamicsCompressor();MU.node.connect(MU.duck);MU.duck.connect(comp);comp.connect(c.destination);MU.node.gain.value=MU.on?MU.vol*.55:0;
  const nb=c.createBuffer(1,c.sampleRate,c.sampleRate),d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;MU.noise=nb;
@@ -317,9 +317,12 @@ function muInit(){const c=au();if(!c||MU.node)return;MU.node=c.createGain();MU.d
  o1.type='sawtooth';o2.type='square';o2.detune.value=7;lfo.frequency.value=5.8;lg.gain.value=9;lfo.connect(lg);lg.connect(o1.detune);lg.connect(o2.detune);
  bp.type='peaking';bp.frequency.value=1400;bp.Q.value=1.6;bp.gain.value=9;lp.type='lowpass';lp.frequency.value=3200;const m2=c.createGain();m2.gain.value=.35;
  o1.connect(bp);o2.connect(m2);m2.connect(bp);bp.connect(lp);lp.connect(g);g.connect(MU.node);g.gain.value=0;[o1,o2,lfo].forEach(o=>o.start());MU.pi={o1,o2,g};
- MU.next=c.currentTime+.1;MU.timer=setInterval(muSched,25)}
-function muVol(){if(MU.node)MU.node.gain.setTargetAtTime(MU.on?MU.vol*.55:0,AC.currentTime,.15)}
-function muDuck(on){if(MU.duck)MU.duck.gain.setTargetAtTime(on?.35:1,AC.currentTime,.12)}
+ MU.next=c.currentTime+.1;MU.timer=setInterval(muSched,25);
+ try{const a=new Audio('assets/boxsong1.mp3');a.loop=true;a.preload='auto';MU.au=a;const src=c.createMediaElementSource(a);MU.sg=c.createGain();MU.sd=c.createGain();src.connect(MU.sg);MU.sg.connect(MU.sd);MU.sd.connect(c.destination);a.onerror=()=>{MU.mode='synth';muMode()}}catch(e){MU.mode='synth'}
+ muMode()}
+function muMode(){if(!AC)return;const song=MU.mode==='song'&&MU.au;if(song){if(MU.pi)MU.pi.g.gain.setTargetAtTime(0,AC.currentTime,.05);MU.au.play().catch(()=>{})}else if(MU.au)MU.au.pause();MU.next=AC.currentTime+.1;muVol();if(window.muLabel)muLabel()}
+function muVol(){if(MU.node)MU.node.gain.setTargetAtTime(MU.on?MU.vol*.55:0,AC.currentTime,.15);if(MU.sg)MU.sg.gain.setTargetAtTime(MU.on?MU.vol*.9:0,AC.currentTime,.15)}
+function muDuck(on){if(MU.duck)MU.duck.gain.setTargetAtTime(on?.35:1,AC.currentTime,.12);if(MU.sd)MU.sd.gain.setTargetAtTime(on?.3:1,AC.currentTime,.12)}
 function env(g,t,a,pk,dec){g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(pk,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+a+dec)}
 function drum(t,f0,f1,pk,dec,nz){const c=AC,o=c.createOscillator(),g=c.createGain();o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f1,t+dec*.8);o.connect(g);g.connect(MU.node);env(g,t,.003,pk,dec);o.start(t);o.stop(t+dec+.05);
  if(nz){const sN=c.createBufferSource(),f=c.createBiquadFilter(),gn=c.createGain();sN.buffer=MU.noise;f.type='bandpass';f.frequency.value=nz;f.Q.value=1.2;sN.connect(f);f.connect(gn);gn.connect(MU.node);env(gn,t,.002,pk*.5,.06);sN.start(t,Math.random()*.5);sN.stop(t+.1)}}
@@ -334,7 +337,7 @@ function piNote(t,dur,fast){const p=MU.pi;if(!p)return;
  if(Math.random()<.45){p.o1.frequency.setTargetAtTime(fg,t,.008);p.o2.frequency.setTargetAtTime(fg,t,.008);p.o1.frequency.setTargetAtTime(f,t+Math.min(.05,dur*.3),.012);p.o2.frequency.setTargetAtTime(f,t+Math.min(.05,dur*.3),.012)}
  else{p.o1.frequency.setTargetAtTime(f,t,.015);p.o2.frequency.setTargetAtTime(f,t,.015)}
  p.g.gain.setTargetAtTime(fast?.13:.1,t,.02);p.g.gain.setTargetAtTime(fast?.09:.06,t+dur*.6,.05)}
-function muSched(){const c=AC;if(!c)return;const fight=S.phase==='fight',bpm=fight?150:84,sp=60/bpm/4;
+function muSched(){const c=AC;if(!c)return;if(MU.mode==='song'&&MU.au){const r=S.phase==='fight'?MU.fast:1;if(Math.abs(MU.au.playbackRate-r)>.01)MU.au.playbackRate=r;MU.next=c.currentTime+.1;return}const fight=S.phase==='fight',bpm=fight?150:84,sp=60/bpm/4;
  while(MU.next<c.currentTime+.12){const t=MU.next,st=MU.step;
   if(fight){if([0,3,6,8,11,14].includes(st))drum(t,140,70,.5,.16);if([2,4,10,12,13].includes(st))drum(t,360,300,.28,.08,1800);
    if(st%4===0)ching(t,st%8===0);if(st%2===0)piNote(t,sp*2,true)}
@@ -378,7 +381,9 @@ wsConnect();
 $('bGo').onclick=()=>startFight();
 $('bAuto').onclick=()=>{CFG.auto=!CFG.auto;$('bAuto').textContent='โหมด: '+(CFG.auto?'นับถอยหลัง':'กดเริ่มเอง');if(CFG.auto&&S.phase==='lobby')S.timer=CFG.lobby};
 $('bLob').onclick=()=>{const L=[30,60,90,120,180];CFG.lobby=L[(L.indexOf(CFG.lobby)+1)%L.length];$('bLob').textContent=`รอ ${CFG.lobby} วิ`;if(S.phase==='lobby')S.timer=CFG.lobby};
-function muLabel(){$('bMu').textContent='🎵 เพลง: '+(MU.on?'เปิด':'ปิด');$('bMv').textContent='ความดัง '+Math.round(MU.vol*100)+'%'}muLabel();
+function muLabel(){$('bSong').textContent=MU.mode==='song'?'🎶 เพลง: ไฟล์':'🎶 เพลง: ปี่ชวา';$('bSpd').textContent='⏩ ตอนชก x'+MU.fast;$('bMu').textContent='🎵 เพลง: '+(MU.on?'เปิด':'ปิด');$('bMv').textContent='ความดัง '+Math.round(MU.vol*100)+'%'}muLabel();
+$('bSong').onclick=()=>{MU.mode=MU.mode==='song'?'synth':'song';try{localStorage.setItem('box_mode',MU.mode)}catch(e){}muInit();muMode();muLabel()};
+$('bSpd').onclick=()=>{MU.fast=MU.fast>=2?1.25:MU.fast>=1.5?2:1.5;try{localStorage.setItem('box_fast',MU.fast)}catch(e){}muLabel()};
 $('bMu').onclick=()=>{MU.on=!MU.on;try{localStorage.setItem('box_mu',MU.on?'1':'0')}catch(e){}muInit();muVol();muLabel()};
 $('bMv').onclick=()=>{const L=[.3,.45,.6,.8,1];MU.vol=L[(L.findIndex(v=>v>=MU.vol-.01)+1)%L.length];try{localStorage.setItem('box_mv',MU.vol)}catch(e){}muVol();muLabel()};
 $('gear').onclick=()=>$('sim').classList.toggle('hide');
@@ -400,6 +405,6 @@ function camLbl(){if(window.G3)$('bCam').textContent='📷 ซูมอัตโ
 addEventListener('g3ready',camLbl);
 $('bCam').onclick=()=>{if(window.G3){G3.setAuto(!G3.auto);camLbl()}};$('bCamR').onclick=()=>{window.G3&&G3.resetCam()};
 </script>
-<script type="module" src="assets/boxing3d.js?v=1794879884"></script>
+<script type="module" src="assets/boxing3d.js?v=1794880195"></script>
 </body>
 </html>
