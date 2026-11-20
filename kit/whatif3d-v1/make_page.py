@@ -9,6 +9,7 @@ def rep(a, b, cnt=1):
 # ---- face: glasses, happy (open smile), talk ----
 rep("""    else if (mood === "smile") { g.beginPath(); g.arc(256, ey + 100, 34, 0.15 * Math.PI, 0.85 * Math.PI); g.stroke(); }""",
 """    else if (mood === "smile") { g.beginPath(); g.arc(256, ey + 100, 34, 0.15 * Math.PI, 0.85 * Math.PI); g.stroke(); }
+    else if (mood === "grin") { g.beginPath(); g.arc(256, ey + 96, 38, 0.12 * Math.PI, 0.88 * Math.PI); g.stroke(); }
     else if (mood === "happy") { g.fillStyle = "#6A2018"; g.beginPath(); g.moveTo(214, ey + 108); g.quadraticCurveTo(256, ey + 178, 298, ey + 108); g.closePath(); g.fill(); g.fillStyle = "#E86A70"; g.beginPath(); g.ellipse(256, ey + 140, 20, 10, 0, 0, 7); g.fill(); }
     else if (mood === "talk") { g.fillStyle = "#4A1812"; g.beginPath(); g.ellipse(256, ey + 124, 22, 16, 0, 0, 7); g.fill(); }""")
 rep("""    else { g.beginPath(); g.moveTo(232, ey + 120); g.quadraticCurveTo(256, ey + 130, 280, ey + 120); g.stroke(); }
@@ -148,7 +149,7 @@ function bubbleUI(f, tg) { const k = popK(tg, f.t); if (k < 0) return; og.save()
   og.fillStyle = "#FFF"; og.strokeStyle = "#3E3029"; og.lineWidth = 5; og.beginPath(); og.moveTo(-18, h / 2 - 4); og.lineTo((f.tx ?? x) - x, (f.ty ?? y + 120) - y); og.lineTo(18, h / 2 - 4); og.closePath(); og.fill(); og.stroke(); rrect(-w / 2, -h / 2, w, h, h / 2); og.fill(); og.stroke(); og.fillRect(-16, h / 2 - 12, 32, 10);
   og.fillStyle = "#3E3029"; og.textAlign = "center"; og.textBaseline = "middle"; og.fillText(f.text, 0, 3); og.restore(); }
 function confettiUI(f, tg) { const e = tg - f.t; if (e < 0 || e > (f.d || 2.5)) return; let r = 1234; const rnd = () => ((r = (r * 16807) % 2147483647) / 2147483647); for (let i = 0; i < 70; i++) { const x = rnd() * W, y0 = -100 - rnd() * 700, sp = 400 + rnd() * 300, y = y0 + e * sp; og.save(); og.translate(x + Math.sin(e * 3 + i) * 30, y); og.rotate(e * 4 + i); og.fillStyle = ["#F2B63D", "#E2553B", "#2E8C86", "#E89AA6", "#6FA8DC"][i % 5]; og.fillRect(-9, -15, 18, 30); og.restore(); } }
-function badgeUI() { og.save(); og.font = "700 28px Kanit"; const w = og.measureText("เล่าเรื่อง2มิติ").width + 44; og.fillStyle = "#24304F"; rrect(W - 34 - w, 40, w, 50, 25); og.fill(); og.fillStyle = "#FFD447"; og.textBaseline = "middle"; og.textAlign = "left"; og.fillText("เล่าเรื่อง2มิติ", W - 34 - w + 22, 66); og.restore(); }
+function badgeUI() { if (EP && EP.noBadge) return; const BN = (EP && EP.channel) || "เล่าเรื่อง2มิติ"; og.save(); og.font = "700 28px Kanit"; const w = og.measureText(BN).width + 44; og.fillStyle = "#24304F"; rrect(W - 34 - w, 40, w, 50, 25); og.fill(); og.fillStyle = "#FFD447"; og.textBaseline = "middle"; og.textAlign = "left"; og.fillText(BN, W - 34 - w + 22, 66); og.restore(); }
 function overlay(tg) {""")
 rep("""if (f.type === "card" && tg >= f.t && tg < (f.end ?? 1e9)) card(f.text, f.t, tg, f.y);""",
     """if (tg >= f.t && tg < (f.end ?? 1e9)) { if (f.type === "card") card(f.text, f.t, tg, f.y); else if (f.type === "wcard") wcard(f, tg); else if (f.type === "phone") phoneUI(f, tg); else if (f.type === "choice") choiceUI(f, tg); else if (f.type === "name") nameUI(f, tg); else if (f.type === "bubble") bubbleUI(f, tg); else if (f.type === "confetti") confettiUI(f, tg); }""")
